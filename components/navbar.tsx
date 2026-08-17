@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -16,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Upload, Shield, UserCheck, LogOut, LogIn, User as UserIcon, Menu, X, Star } from "lucide-react";
+import { Upload, LogOut, LogIn, User as UserIcon, Menu, X, Star, LayoutDashboard } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -35,7 +36,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-colors">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
-        {/* Brand Logo (Tight typography matching image titles) */}
+        {/* Brand Logo (Tight typography) */}
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -95,20 +96,12 @@ export function Navbar() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem render={<Link href="/dashboard" className="w-full flex items-center gap-2.5 py-2 min-h-[40px]" />}>
+                  <LayoutDashboard className="size-4 text-primary" /> Dashboard
+                </DropdownMenuItem>
                 <DropdownMenuItem render={<Link href="/submit" className="w-full flex items-center gap-2.5 py-2 min-h-[40px]" />}>
                   <Upload className="size-4 text-muted-foreground" /> Submit Photo
                 </DropdownMenuItem>
-                <DropdownMenuItem render={<Link href="/my-submissions" className="w-full flex items-center gap-2.5 py-2 min-h-[40px]" />}>
-                  <UserCheck className="size-4 text-muted-foreground" /> My Submissions
-                </DropdownMenuItem>
-                {isAdmin && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem render={<Link href="/admin" className="w-full flex items-center gap-2.5 py-2 min-h-[40px]" />}>
-                      <Shield className="size-4 text-amber-500" /> Admin Dashboard
-                    </DropdownMenuItem>
-                  </>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-destructive focus:text-destructive cursor-pointer min-h-[40px] py-2"
@@ -163,41 +156,18 @@ export function Navbar() {
 
             {status === "authenticated" && (
               <Link
-                href="/my-submissions"
+                href="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors min-h-[44px]",
-                  pathname === "/my-submissions"
+                  pathname === "/dashboard"
                     ? "bg-muted text-foreground font-semibold"
                     : "text-foreground hover:bg-muted active:bg-muted/80"
                 )}
               >
-                <UserCheck className="size-4 text-muted-foreground" />
-                <span>My Submissions</span>
+                <LayoutDashboard className="size-4 text-primary" />
+                <span>Dashboard</span>
               </Link>
-            )}
-
-            {isAdmin && (
-              <>
-                <div className="border-t my-1 pt-1">
-                  <p className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider px-3 py-1">
-                    Admin Tools
-                  </p>
-                </div>
-                <Link
-                  href="/admin"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors min-h-[44px]",
-                    pathname.startsWith("/admin")
-                      ? "bg-amber-500/10 text-amber-600 font-semibold"
-                      : "text-foreground hover:bg-muted active:bg-muted/80"
-                  )}
-                >
-                  <Shield className="size-4 text-amber-500" />
-                  <span>Admin Dashboard</span>
-                </Link>
-              </>
             )}
           </nav>
         </div>
