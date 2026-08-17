@@ -158,7 +158,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                   }
                 }}
               >
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+                <div className="relative aspect-square w-full overflow-hidden bg-muted">
                   <Image
                     src={item.imageUrl}
                     alt={item.caption}
@@ -190,11 +190,11 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
         </div>
       )}
 
-      {/* Detailed Photo Modal View with Carousel Navigation */}
+      {/* Detailed Photo Modal View with Square Aspect Ratio Lightbox */}
       <Dialog open={activePhotoIndex !== null} onOpenChange={(open) => !open && setActivePhotoIndex(null)}>
-        <DialogContent className="w-[98vw] max-w-6xl sm:w-[94vw] p-0 overflow-hidden max-h-[95vh] flex flex-col rounded-2xl border shadow-2xl">
+        <DialogContent className="w-[95vw] max-w-2xl sm:w-[90vw] p-0 overflow-hidden max-h-[94vh] flex flex-col rounded-2xl border shadow-2xl">
           {activePhoto && activePhotoIndex !== null && (
-            <div className="flex flex-col max-h-[95vh] overflow-y-auto">
+            <div className="flex flex-col max-h-[94vh] overflow-y-auto">
               <DialogHeader className="p-4 sm:p-5 pb-3 border-b sticky top-0 bg-background/95 backdrop-blur z-10 flex flex-row items-center justify-between gap-4">
                 <DialogTitle className="text-lg sm:text-xl font-serif font-bold flex items-center gap-2 pr-8 min-w-0">
                   <span className="truncate">{activePhoto.caption}</span>
@@ -207,12 +207,13 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="relative w-full min-h-[50vh] sm:min-h-[65vh] lg:min-h-[74vh] max-h-[76vh] bg-black/95 flex-shrink-0 flex items-center justify-center p-2 sm:p-4">
+              {/* 1:1 Square Photo Container */}
+              <div className="relative w-full aspect-square max-h-[62vh] bg-black/95 flex-shrink-0 flex items-center justify-center p-2 sm:p-4 overflow-hidden">
                 <Image
                   src={activePhoto.imageUrl}
                   alt={activePhoto.caption}
                   fill
-                  sizes="(max-width: 1200px) 95vw, 1200px"
+                  sizes="(max-width: 768px) 95vw, 650px"
                   className="object-contain"
                   priority
                 />
