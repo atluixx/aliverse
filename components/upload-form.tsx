@@ -107,34 +107,35 @@ export function UploadForm({ moments }: UploadFormProps) {
         <CardContent className="flex flex-col gap-6">
           {/* File Upload Zone */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="image">Photo</Label>
+            <Label htmlFor="image" className="text-sm font-semibold">Photo</Label>
             {previewUrl ? (
-              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border bg-black">
+              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl border bg-black">
                 <Image src={previewUrl} alt="Upload preview" fill className="object-contain" />
                 <Button
                   type="button"
                   variant="destructive"
                   size="icon"
-                  className="absolute top-2 right-2 size-8 rounded-full shadow-md"
+                  className="absolute top-3 right-3 size-11 rounded-full shadow-lg border border-white/20 active:scale-95 transition-transform"
                   onClick={clearFile}
+                  aria-label="Remove image preview"
                 >
-                  <X className="size-4" />
+                  <X className="size-5" />
                 </Button>
               </div>
             ) : (
               <label
                 htmlFor="image"
-                className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/60 transition-colors border-muted-foreground/30"
+                className="flex flex-col items-center justify-center w-full min-h-[180px] p-6 border-2 border-dashed rounded-xl cursor-pointer bg-muted/20 hover:bg-muted/50 active:bg-muted/70 transition-colors border-muted-foreground/30"
               >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center px-4">
-                  <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3">
-                    <ImageIcon className="size-6" />
+                <div className="flex flex-col items-center justify-center text-center">
+                  <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-3 shadow-xs">
+                    <ImageIcon className="size-7" />
                   </div>
                   <p className="mb-1 text-sm font-semibold text-foreground">
-                    Click to select photo or drag and drop
+                    Tap to select photo or drag & drop
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    PNG, JPG, WEBP up to 15MB
+                    PNG, JPG, WEBP or GIF up to 15MB
                   </p>
                 </div>
                 <Input
@@ -151,11 +152,12 @@ export function UploadForm({ moments }: UploadFormProps) {
 
           {/* Caption Input */}
           <div className="flex flex-col gap-2">
-            <Label htmlFor="caption">Caption & Memory</Label>
+            <Label htmlFor="caption" className="text-sm font-semibold">Caption & Memory</Label>
             <Textarea
               id="caption"
               placeholder="What makes this moment special in the Aliverso?"
               rows={3}
+              className="text-base sm:text-sm p-3 rounded-xl"
               value={caption}
               onChange={(e) => setCaption(e.target.value)}
               disabled={isSubmitting}
@@ -165,9 +167,9 @@ export function UploadForm({ moments }: UploadFormProps) {
           {/* Optional Moment Selector */}
           {moments.length > 0 && (
             <div className="flex flex-col gap-2">
-              <Label htmlFor="moment">Associated Moment (Optional)</Label>
+              <Label htmlFor="moment" className="text-sm font-semibold">Associated Moment (Optional)</Label>
               <Select value={momentId} onValueChange={(val) => setMomentId(val || "")} disabled={isSubmitting}>
-                <SelectTrigger id="moment">
+                <SelectTrigger id="moment" className="h-11 rounded-xl text-base sm:text-sm">
                   <SelectValue placeholder="Select a moment category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -183,19 +185,19 @@ export function UploadForm({ moments }: UploadFormProps) {
           )}
         </CardContent>
 
-        <CardFooter className="flex justify-end gap-3 pt-2">
-          <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>
+        <CardFooter className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
+          <Button type="button" variant="outline" className="w-full sm:w-auto h-11 px-6 text-sm" onClick={() => router.back()} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting || !file}>
+          <Button type="submit" className="w-full sm:w-auto h-11 px-6 text-sm font-semibold gap-2" disabled={isSubmitting || !file}>
             {isSubmitting ? (
               <>
-                <Loader2 data-icon="inline-start" className="animate-spin" />
+                <Loader2 data-icon="inline-start" className="animate-spin size-4" />
                 Uploading...
               </>
             ) : (
               <>
-                <Upload data-icon="inline-start" />
+                <Upload data-icon="inline-start" className="size-4" />
                 Submit Photo
               </>
             )}

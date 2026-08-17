@@ -153,8 +153,8 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
             <span className="text-xs text-muted-foreground">Total Users</span>
             <p className="text-xl font-bold">{users.length}</p>
           </div>
-          <div className="rounded-lg border px-4 py-2 bg-card border-l-4 border-l-amber-500">
-            <span className="text-xs text-muted-foreground">Admins</span>
+          <div className="rounded-lg border px-4 py-2 bg-amber-500/5 dark:bg-amber-500/10 border-amber-500/20">
+            <span className="text-xs text-amber-900 dark:text-amber-200 font-medium">Admins</span>
             <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{totalAdmins}</p>
           </div>
         </div>
@@ -176,9 +176,76 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
         />
       </div>
 
-      {/* Users Table */}
+      {/* Users Table & Mobile Cards */}
       <Card className="overflow-hidden border shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Mobile View (< md) */}
+        <div className="md:hidden divide-y divide-border">
+          {filteredUsers.map((item) => (
+            <div key={item.id} className="p-4 flex flex-col gap-3 bg-card">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <Avatar className="size-10 border">
+                    <AvatarImage src={item.image || undefined} />
+                    <AvatarFallback>{item.name?.charAt(0) || "U"}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold leading-tight">
+                      {item.name || "Unnamed User"}
+                      {item.id === currentUserId && (
+                        <span className="ml-1 text-[10px] text-muted-foreground font-normal">(You)</span>
+                      )}
+                    </span>
+                    <span className="text-xs font-mono text-muted-foreground mt-0.5">@{item.username || "no_username"}</span>
+                  </div>
+                </div>
+
+                <div>
+                  {item.role === "ADMIN" ? (
+                    <Badge className="bg-amber-500 hover:bg-amber-600 text-white gap-1 text-[11px] py-1 px-2.5">
+                      <Shield className="size-3" /> Admin
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="gap-1 text-[11px] py-1 px-2.5">
+                      User
+                    </Badge>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1 text-xs text-muted-foreground pt-1 border-t">
+                {item.email && <p>Email: <span className="text-foreground">{item.email}</span></p>}
+                <p>Joined: <span className="text-foreground">{new Date(item.createdAt).toLocaleDateString()}</span></p>
+              </div>
+
+              {/* Mobile Actions */}
+              <div className="flex items-center justify-end pt-2">
+                <Button
+                  variant={item.role === "ADMIN" ? "outline" : "default"}
+                  size="sm"
+                  className={cn(
+                    "h-10 px-4 text-xs font-semibold gap-2 w-full sm:w-auto",
+                    item.role === "ADMIN" ? "text-rose-600 border-rose-200 hover:bg-rose-50" : "bg-amber-600 hover:bg-amber-700 text-white"
+                  )}
+                  onClick={() => handleRoleChange(item.id, item.role)}
+                  disabled={isPending || item.id === currentUserId}
+                >
+                  {item.role === "ADMIN" ? (
+                    <>
+                      <ShieldAlert className="size-4" /> Demote to Standard User
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="size-4" /> Promote to Admin
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop Table (>= md) */}
+        <div className="hidden md:block overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -236,24 +303,25 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
 
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-8")}>
+                      <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-9")}>
                         <MoreVertical className="size-4" />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="w-52">
                         <DropdownMenuLabel>Role Management</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => handleRoleChange(item.id, item.role)}
                           disabled={isPending || item.id === currentUserId}
+                          className="min-h-[44px]"
                         >
                           {item.role === "ADMIN" ? (
                             <>
-                              <ShieldAlert data-icon="inline-start" className="text-rose-500" />
+                              <ShieldAlert data-icon="inline-start" className="text-rose-500 size-4" />
                               Demote to Standard User
                             </>
                           ) : (
                             <>
-                              <Shield data-icon="inline-start" className="text-amber-500" />
+                              <Shield data-icon="inline-start" className="text-amber-500 size-4" />
                               Promote to Admin
                             </>
                           )}

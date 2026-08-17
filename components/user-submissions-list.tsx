@@ -94,10 +94,11 @@ export function UserSubmissionsList({ submissions: initialSubmissions }: UserSub
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-7 text-muted-foreground hover:text-destructive"
+                className="size-10 sm:size-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-transform"
                 onClick={() => handleDelete(item.id)}
                 disabled={isPending}
                 title="Delete submission"
+                aria-label="Delete photo submission"
               >
                 <Trash2 className="size-4" />
               </Button>

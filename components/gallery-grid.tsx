@@ -58,13 +58,13 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
     <div className="flex flex-col gap-8">
       {/* Tag Filters */}
       {allTags.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 pb-2">
-          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1 mr-2">
-            <Tag className="size-3.5" /> Filter by:
+        <div className="flex items-center gap-2 pb-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1 shrink-0 mr-1">
+            <Tag className="size-3.5" /> Filter:
           </span>
           <Badge
             variant={selectedTag === "all" ? "default" : "outline"}
-            className="cursor-pointer transition-colors"
+            className="cursor-pointer transition-colors py-1.5 px-3 shrink-0 text-xs min-h-[36px] flex items-center"
             onClick={() => setSelectedTag("all")}
           >
             All Photos ({submissions.length})
@@ -73,13 +73,12 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
             <Badge
               key={tag}
               variant={selectedTag === tag ? "default" : "outline"}
-              className="cursor-pointer transition-colors capitalize"
+              className="cursor-pointer transition-colors capitalize py-1.5 px-3 shrink-0 text-xs min-h-[36px] flex items-center"
               onClick={() => setSelectedTag(tag)}
             >
               #{tag}
             </Badge>
           ))}
-          <Separator className="mt-2" />
         </div>
       )}
 
@@ -105,20 +104,29 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
           {filteredSubmissions.map((item) => (
             <Card
               key={item.id}
-              className="group overflow-hidden cursor-pointer transition-all duration-200 hover:border-primary/40 hover:shadow-xs border-border flex flex-col justify-between"
+              tabIndex={0}
+              role="button"
+              aria-label={`View photo titled ${item.caption}`}
+              className="group overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-md border-border flex flex-col justify-between focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none"
               onClick={() => setActivePhoto(item)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setActivePhoto(item);
+                }
+              }}
             >
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
                 <Image
                   src={item.imageUrl}
                   alt={item.caption}
                   fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
                 {item.moment?.tags && item.moment.tags.length > 0 && (
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-                    <Badge className="bg-background/90 text-foreground backdrop-blur border text-[11px] font-normal">
+                    <Badge className="bg-background/90 text-foreground backdrop-blur border text-[11px] font-normal shadow-xs">
                       #{item.moment.tags[0]}
                     </Badge>
                   </div>
@@ -126,24 +134,24 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
               </div>
 
               <CardContent className="p-4 flex-1 flex flex-col justify-between">
-                <p className="text-sm font-medium leading-snug line-clamp-2 text-foreground mb-2">
+                <p className="text-sm font-medium leading-snug line-clamp-2 text-foreground mb-2 group-hover:text-primary transition-colors">
                   {item.caption}
                 </p>
               </CardContent>
 
               <CardFooter className="px-4 py-3 border-t bg-muted/20 flex items-center justify-between text-xs text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <Avatar className="size-6">
+                  <Avatar className="size-6 border shadow-2xs">
                     <AvatarImage src={item.user.image || undefined} />
-                    <AvatarFallback>{item.user.name?.charAt(0) || "U"}</AvatarFallback>
+                    <AvatarFallback className="text-[10px] font-semibold">{item.user.name?.charAt(0) || "U"}</AvatarFallback>
                   </Avatar>
-                  <span className="font-medium text-foreground truncate max-w-[120px]">
+                  <span className="font-medium text-foreground truncate max-w-[130px]">
                     {item.user.name || "Anonymous"}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 text-[11px]">
-                  <Calendar className="size-3" />
-                  <span>{new Date(item.submittedAt).toLocaleDateString()}</span>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Calendar className="size-3 text-muted-foreground/70" />
+                  <span>{new Date(item.submittedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
                 </div>
               </CardFooter>
             </Card>
@@ -153,20 +161,20 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
 
       {/* Detailed Photo Modal View */}
       <Dialog open={!!activePhoto} onOpenChange={(open) => !open && setActivePhoto(null)}>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden sm:max-h-[90vh] flex flex-col">
+        <DialogContent className="w-[95vw] max-w-3xl p-0 overflow-hidden max-h-[92vh] flex flex-col rounded-2xl border shadow-2xl">
           {activePhoto && (
-            <>
-              <DialogHeader className="p-6 pb-2 border-b">
-                <DialogTitle className="text-xl font-serif font-bold flex items-center gap-2">
-                  <Sparkles className="size-5 text-primary" />
-                  {activePhoto.caption}
+            <div className="flex flex-col max-h-[92vh] overflow-y-auto">
+              <DialogHeader className="p-4 sm:p-6 pb-3 border-b sticky top-0 bg-background/95 backdrop-blur z-10">
+                <DialogTitle className="text-lg sm:text-xl font-serif font-bold flex items-center gap-2 pr-8">
+                  <Sparkles className="size-5 text-primary shrink-0" />
+                  <span className="line-clamp-1">{activePhoto.caption}</span>
                 </DialogTitle>
                 <DialogDescription className="sr-only">
                   Detailed view of submission by {activePhoto.user.name}
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="relative w-full aspect-[16/10] bg-black max-h-[500px]">
+              <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-black max-h-[55vh] flex-shrink-0">
                 <Image
                   src={activePhoto.imageUrl}
                   alt={activePhoto.caption}
@@ -176,7 +184,11 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                 />
               </div>
 
-              <div className="p-6 flex flex-col gap-4 bg-background">
+              <div className="p-4 sm:p-6 flex flex-col gap-4 bg-background">
+                <p className="text-sm font-medium leading-relaxed text-foreground sm:hidden">
+                  {activePhoto.caption}
+                </p>
+
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
                   <div className="flex items-center gap-3">
                     <Avatar className="size-10 border">
@@ -185,7 +197,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                     </Avatar>
                     <div>
                       <p className="text-sm font-semibold">{activePhoto.user.name || "Anonymous Contributor"}</p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <Calendar className="size-3" />
                         Submitted on {new Date(activePhoto.submittedAt).toLocaleDateString(undefined, { dateStyle: "long" })}
                       </p>
@@ -195,7 +207,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                   {activePhoto.moment?.tags && (
                     <div className="flex flex-wrap gap-1.5">
                       {activePhoto.moment.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary">
+                        <Badge key={tag} variant="secondary" className="text-xs">
                           #{tag}
                         </Badge>
                       ))}
@@ -204,13 +216,13 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                 </div>
 
                 {activePhoto.moment?.caption && (
-                  <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
+                  <div className="rounded-xl bg-muted/50 p-3.5 text-xs text-muted-foreground">
                     <span className="font-semibold text-foreground">Featured Moment: </span>
                     {activePhoto.moment.caption}
                   </div>
                 )}
               </div>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>
