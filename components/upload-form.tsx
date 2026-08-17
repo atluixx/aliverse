@@ -62,29 +62,17 @@ export function UploadForm({ moments }: UploadFormProps) {
     toast.loading("Uploading photo to Aliverso...", { id: "uploading" });
 
     try {
-      let finalImageUrl = "";
+      // Upload file directly via FormData endpoint (handles Vercel Blob or Base64 Data URL)
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-      // Try Vercel Blob client upload first
-      try {
-        const newBlob = await upload(file.name, file, {
-          access: "public",
-          handleUploadUrl: "/api/upload",
-        });
-        finalImageUrl = newBlob.url;
-      } catch (blobErr) {
-        console.warn("Direct blob upload switched to API endpoint handler:", blobErr);
-        // Fallback: upload file directly via FormData endpoint
-        const formData = new FormData();
-        formData.append("file", file);
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to upload image");
-        finalImageUrl = data.url;
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to upload image");
+      const finalImageUrl = data.url;
 
       // Create submission row in DB via Server Action
       await createSubmission({

@@ -103,28 +103,20 @@ export function Navbar() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link href="/my-submissions" className="w-full flex items-center gap-2">
-                    <User className="size-4" /> My Profile & Submissions
-                  </Link>
+                <DropdownMenuItem render={<Link href="/my-submissions" className="w-full flex items-center gap-2" />}>
+                  <User className="size-4" /> My Profile & Submissions
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link href="/submit" className="w-full flex items-center gap-2">
-                    <Upload className="size-4" /> Submit Photo
-                  </Link>
+                <DropdownMenuItem render={<Link href="/submit" className="w-full flex items-center gap-2" />}>
+                  <Upload className="size-4" /> Submit Photo
                 </DropdownMenuItem>
                 {isAdmin && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Link href="/admin/review" className="w-full flex items-center gap-2">
-                        <Shield className="size-4" /> Moderation Dashboard
-                      </Link>
+                    <DropdownMenuItem render={<Link href="/admin/review" className="w-full flex items-center gap-2" />}>
+                      <Shield className="size-4" /> Moderation Dashboard
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/admin/users" className="w-full flex items-center gap-2">
-                        <Users className="size-4" /> Manage Admins & Roles
-                      </Link>
+                    <DropdownMenuItem render={<Link href="/admin/users" className="w-full flex items-center gap-2" />}>
+                      <Users className="size-4" /> Manage Admins & Roles
                     </DropdownMenuItem>
                   </>
                 )}
