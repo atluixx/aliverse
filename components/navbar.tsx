@@ -78,13 +78,11 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {status === "authenticated" && user ? (
             <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button variant="ghost" className="relative size-10 rounded-full p-0">
-                  <Avatar className="size-10 border border-border">
-                    <AvatarImage src={user.image || undefined} alt={user.name || "User"} />
-                    <AvatarFallback>{user.name?.substring(0, 2).toUpperCase() || user.username?.substring(0, 2).toUpperCase() || "AL"}</AvatarFallback>
-                  </Avatar>
-                </Button>
+              <DropdownMenuTrigger className="relative size-10 rounded-full p-0 focus-visible:ring-2 focus-visible:ring-ring outline-none cursor-pointer">
+                <Avatar className="size-10 border border-border">
+                  <AvatarImage src={user.image || undefined} alt={user.name || "User"} />
+                  <AvatarFallback>{user.name?.substring(0, 2).toUpperCase() || user.username?.substring(0, 2).toUpperCase() || "AL"}</AvatarFallback>
+                </Avatar>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="font-normal">
