@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -14,7 +14,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import {
-  Sparkles,
   Calendar,
   Tag,
   Upload,
@@ -193,59 +192,59 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
           </Link>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
           {paginatedSubmissions.map((item, pageItemIndex) => {
             const globalIndex = startIndex + pageItemIndex;
             const photoNumber = globalIndex + 1;
             const author = item.user.username ? `@${item.user.username}` : item.user.name || "Anonymous";
 
             return (
-              <Card
-                key={item.id}
-                tabIndex={0}
-                role="button"
-                aria-label={`View photo #${photoNumber} titled ${item.caption}`}
-                className="group overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-md border-border flex flex-col justify-between focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none"
-                onClick={() => setActivePhotoIndex(globalIndex)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setActivePhotoIndex(globalIndex);
-                  }
-                }}
-              >
-                {/* 1:1 Square Photo Container */}
-                <div className="relative aspect-square w-full overflow-hidden bg-muted">
-                  <Image
-                    src={item.imageUrl}
-                    alt={item.caption}
-                    fill
-                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                  {/* Dynamic Sequential Photo Number Badge (#1, #2, #3...) */}
-                  <div className="absolute top-3 left-3 bg-background/90 text-foreground backdrop-blur px-2.5 py-1 rounded-full text-xs font-mono font-bold shadow-xs border">
-                    #{photoNumber}
+              <div key={item.id} className="flex flex-col group">
+                {/* Photo Card Container (Contains ONLY the photo image) */}
+                <Card
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`View photo #${photoNumber}: ${item.caption}`}
+                  className="overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-lg border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none p-0 rounded-2xl"
+                  onClick={() => setActivePhotoIndex(globalIndex)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setActivePhotoIndex(globalIndex);
+                    }
+                  }}
+                >
+                  <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.caption}
+                      fill
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                  </div>
+                </Card>
+
+                {/* H2 Title and Author Handle Outside Card */}
+                <div className="mt-3 flex flex-col gap-1 px-1">
+                  <h2
+                    className="text-base sm:text-lg font-serif font-bold text-foreground leading-snug line-clamp-2 cursor-pointer group-hover:text-primary transition-colors"
+                    onClick={() => setActivePhotoIndex(globalIndex)}
+                  >
+                    #{photoNumber}: {item.caption}
+                  </h2>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground font-medium pt-0.5">
+                    <span className="flex items-center gap-1.5 text-foreground font-semibold">
+                      <UserIcon className="size-3.5 text-primary shrink-0" />
+                      {author}
+                    </span>
+                    <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                      <Calendar className="size-3" />
+                      {new Date(item.submittedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                    </span>
                   </div>
                 </div>
-
-                <CardContent className="p-4 flex-1 flex flex-col justify-between">
-                  <p className="text-sm font-medium leading-snug line-clamp-2 text-foreground mb-2 group-hover:text-primary transition-colors">
-                    {item.caption}
-                  </p>
-                </CardContent>
-
-                <CardFooter className="px-4 py-3 border-t bg-muted/20 flex items-center justify-between text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1.5 font-medium text-foreground truncate max-w-[140px]">
-                    <UserIcon className="size-3.5 text-muted-foreground shrink-0" />
-                    <span className="truncate">{author}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                    <Calendar className="size-3 text-muted-foreground/70" />
-                    <span>{new Date(item.submittedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
-                  </div>
-                </CardFooter>
-              </Card>
+              </div>
             );
           })}
         </div>
@@ -253,7 +252,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
 
       {/* Pagination Controls */}
       {filteredSubmissions.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t">
           <p className="text-xs text-muted-foreground font-medium">
             Showing <span className="font-semibold text-foreground">{startIndex + 1}</span> to{" "}
             <span className="font-semibold text-foreground">{endIndex}</span> of{" "}
@@ -327,17 +326,14 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
         </div>
       )}
 
-      {/* Detailed Photo Modal View with Square Aspect Ratio Lightbox */}
+      {/* Detailed Photo Lightbox Modal View */}
       <Dialog open={activePhotoIndex !== null} onOpenChange={(open) => !open && setActivePhotoIndex(null)}>
         <DialogContent className="w-[95vw] max-w-2xl sm:w-[90vw] p-0 overflow-hidden max-h-[94vh] flex flex-col rounded-2xl border shadow-2xl">
           {activePhoto && activePhotoIndex !== null && (
             <div className="flex flex-col max-h-[94vh] overflow-y-auto">
               <DialogHeader className="p-4 sm:p-5 pb-3 border-b sticky top-0 bg-background/95 backdrop-blur z-10 flex flex-row items-center justify-between gap-4">
                 <DialogTitle className="text-lg sm:text-xl font-serif font-bold flex items-center gap-2 pr-8 min-w-0">
-                  <Badge className="bg-primary text-primary-foreground font-mono text-xs font-bold px-2 py-0.5 rounded-md shrink-0">
-                    #{activePhotoIndex + 1}
-                  </Badge>
-                  <span className="truncate">{activePhoto.caption}</span>
+                  <span className="truncate">#{activePhotoIndex + 1}: {activePhoto.caption}</span>
                 </DialogTitle>
                 <Badge variant="outline" className="text-[11px] font-mono px-2.5 py-1 shrink-0 bg-muted/50">
                   {activePhotoIndex + 1} / {filteredSubmissions.length}
@@ -391,10 +387,6 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
               </div>
 
               <div className="p-4 sm:p-6 flex flex-col gap-4 bg-background">
-                <p className="text-sm font-medium leading-relaxed text-foreground sm:hidden">
-                  {activePhoto.caption}
-                </p>
-
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
                   <div className="flex items-center gap-2">
                     <UserIcon className="size-5 text-primary" />
