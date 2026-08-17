@@ -56,38 +56,7 @@ function SignInForm() {
         </Alert>
       )}
 
-      {/* Quick Dev Preset Logins */}
-      <div className="flex flex-col gap-3">
-        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Quick Dev Credentials
-        </Label>
-        <div className="grid grid-cols-2 gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex flex-col items-center gap-1.5 h-auto py-3 border-primary/30 hover:bg-primary/5 text-left col-span-2"
-            onClick={() => {
-              setUsername("ali");
-              setPassword("alidoaliverso");
-            }}
-          >
-            <div className="flex items-center gap-1.5 font-medium text-primary text-xs">
-              <Shield className="size-3.5" />
-              Sign in as Ali (Admin)
-            </div>
-            <span className="text-[10px] text-muted-foreground">ali@aliverso.com / alidoaliverso</span>
-          </Button>
-        </div>
-      </div>
 
-      <div className="relative flex items-center justify-center">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t"></div>
-        </div>
-        <span className="relative bg-background px-2 text-xs text-muted-foreground uppercase">
-          Sign In Form
-        </span>
-      </div>
 
       {/* Username & Password Form */}
       <form onSubmit={handleSignIn} className="flex flex-col gap-4">

@@ -4,7 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
 import { Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import "next-auth/jwt";
+import { authConfig } from "@/auth.config";
 
 declare module "next-auth" {
   interface Session {
@@ -21,18 +21,9 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
-  interface JWT {
-    id?: string;
-    username?: string | null;
-    role?: Role;
-  }
-}
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
   adapter: PrismaAdapter(db) as any,
-  session: { strategy: "jwt" },
-  trustHost: true,
   providers: [
     Credentials({
       name: "Username & Password",
@@ -79,35 +70,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.username = user.username;
-        token.role = user.role || Role.USER;
-      } else if (token.id) {
-        const dbUser = await db.user.findUnique({
-          where: { id: token.id as string },
-          select: { id: true, username: true, role: true },
-        });
-        if (dbUser) {
-          token.username = dbUser.username;
-          token.role = dbUser.role;
-        }
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user && token) {
-        session.user.id = token.id as string;
-        session.user.username = token.username as string | null;
-        session.user.role = (token.role as Role) || Role.USER;
-      }
-      return session;
-    },
-  },
-  pages: {
-    signIn: "/auth/signin",
-  },
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "aliverso_secret_key_2026",
 });
