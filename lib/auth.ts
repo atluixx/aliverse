@@ -3,16 +3,19 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/lib/db";
 import { Role } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 declare module "next-auth" {
   interface Session {
     user: {
       id: string;
+      username?: string | null;
       role: Role;
     } & DefaultSession["user"];
   }
 
   interface User {
+    username?: string | null;
     role?: Role;
   }
 }
@@ -20,6 +23,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
+    username?: string | null;
     role?: Role;
   }
 }
@@ -29,36 +33,42 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   providers: [
     Credentials({
-      name: "Development Login",
+      name: "Username & Password",
       credentials: {
-        email: { label: "Email", type: "email" },
+        username: { label: "Username or Email", type: "text" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email) return null;
+        if (!credentials?.username || !credentials?.password) {
+          return null;
+        }
 
-        const email = (credentials.email as string).toLowerCase().trim();
+        const identifier = (credentials.username as string).trim().toLowerCase();
+        const inputPassword = credentials.password as string;
 
-        // Check if user exists, otherwise create
-        let user = await db.user.findUnique({
-          where: { email },
+        // Search by username or email
+        const user = await db.user.findFirst({
+          where: {
+            OR: [
+              { username: identifier },
+              { email: identifier },
+            ],
+          },
         });
 
         if (!user) {
-          const isAli = email.includes("ali");
-          user = await db.user.create({
-            data: {
-              email,
-              name: isAli ? "Ali (Admin)" : "Universe Contributor",
-              role: isAli ? Role.ADMIN : Role.USER,
-              image: isAli
-                ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-                : "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-            },
-          });
+          return null;
+        }
+
+        // Validate password if user has a password set
+        if (user.password) {
+          const isValid = await bcrypt.compare(inputPassword, user.password);
+          if (!isValid) return null;
         }
 
         return {
           id: user.id,
+          username: user.username,
           name: user.name,
           email: user.email,
           image: user.image,
@@ -71,15 +81,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.username = user.username;
         token.role = user.role || Role.USER;
-      } else if (token.email) {
-        // Fetch current role from DB if missing
+      } else if (token.id) {
         const dbUser = await db.user.findUnique({
-          where: { email: token.email },
-          select: { id: true, role: true },
+          where: { id: token.id as string },
+          select: { id: true, username: true, role: true },
         });
         if (dbUser) {
-          token.id = dbUser.id;
+          token.username = dbUser.username;
           token.role = dbUser.role;
         }
       }
@@ -88,6 +98,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (session.user && token) {
         session.user.id = token.id as string;
+        session.user.username = token.username as string | null;
         session.user.role = (token.role as Role) || Role.USER;
       }
       return session;

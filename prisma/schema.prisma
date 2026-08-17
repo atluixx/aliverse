@@ -20,9 +20,11 @@ enum SubmissionStatus {
 
 model User {
   id            String       @id @default(cuid())
+  username      String?      @unique
   name          String?
   email         String?      @unique
   emailVerified DateTime?
+  password      String?
   image         String?
   role          Role         @default(USER)
   accounts      Account[]

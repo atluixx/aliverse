@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signOut, signIn } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Sparkles, Upload, Shield, Images, UserCheck, LogOut, LogIn } from "lucide-react";
+import { Sparkles, Upload, Shield, Images, UserCheck, LogOut, LogIn, UserPlus, Users } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -30,7 +30,8 @@ export function Navbar() {
   ];
 
   if (isAdmin) {
-    navItems.push({ href: "/admin/review", label: "Admin Review", icon: Shield });
+    navItems.push({ href: "/admin/review", label: "Moderation", icon: Shield });
+    navItems.push({ href: "/admin/users", label: "Manage Admins", icon: Users });
   }
 
   return (
@@ -63,8 +64,8 @@ export function Navbar() {
               >
                 <Icon data-icon="inline-start" />
                 {item.label}
-                {item.href === "/admin/review" && (
-                  <Badge variant="destructive" className="ml-1 text-[10px] px-1.5 py-0.5">
+                {item.href.startsWith("/admin") && (
+                  <Badge variant="destructive" className="ml-0.5 text-[10px] px-1.5 py-0">
                     Admin
                   </Badge>
                 )}
@@ -89,7 +90,7 @@ export function Navbar() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium leading-none">{user.name}</p>
+                      <p className="text-sm font-medium leading-none">{user.name || `@${user.username}`}</p>
                       {isAdmin ? (
                         <Badge variant="default" className="text-[10px] bg-amber-500 hover:bg-amber-600">
                           ADMIN
@@ -110,11 +111,18 @@ export function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 {isAdmin && (
-                  <DropdownMenuItem>
-                    <Link href="/admin/review" className="w-full">
-                      Admin Review Dashboard
-                    </Link>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuItem>
+                      <Link href="/admin/review" className="w-full">
+                        Admin Moderation Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href="/admin/users" className="w-full">
+                        Manage Admins & Roles
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -128,13 +136,14 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" onClick={() => signIn("credentials", { email: "user@aliverso.com", callbackUrl: "/gallery" })}>
-                Demo User
-              </Button>
-              <Button size="sm" onClick={() => signIn("credentials", { email: "ali@aliverso.com", callbackUrl: "/admin/review" })}>
+              <Link href="/auth/signin" className={buttonVariants({ variant: "outline", size: "sm" })}>
                 <LogIn data-icon="inline-start" />
-                Ali (Admin)
-              </Button>
+                Sign In
+              </Link>
+              <Link href="/auth/signup" className={buttonVariants({ size: "sm" })}>
+                <UserPlus data-icon="inline-start" />
+                Sign Up
+              </Link>
             </div>
           )}
         </div>
