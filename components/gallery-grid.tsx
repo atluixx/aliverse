@@ -85,13 +85,13 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
 
       {/* Gallery Grid */}
       {filteredSubmissions.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed gap-4">
+        <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed gap-4 bg-card/60">
           <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
             <Images className="size-6" />
           </div>
-          <div className="flex flex-col gap-1 max-w-sm">
-            <h3 className="text-lg font-bold">No approved photos yet</h3>
-            <p className="text-sm text-muted-foreground">
+          <div className="flex flex-col gap-1.5 max-w-sm">
+            <h3 className="text-xl font-serif font-bold text-foreground">No approved photos yet</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
               The public gallery is clean and ready for real photos. Be the first contributor to submit a photo!
             </p>
           </div>
@@ -105,7 +105,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
           {filteredSubmissions.map((item) => (
             <Card
               key={item.id}
-              className="group overflow-hidden cursor-pointer transition-all hover:shadow-lg border-border/80 flex flex-col justify-between"
+              className="group overflow-hidden cursor-pointer transition-all duration-200 hover:border-primary/40 hover:shadow-xs border-border flex flex-col justify-between"
               onClick={() => setActivePhoto(item)}
             >
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
@@ -113,12 +113,12 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                   src={item.imageUrl}
                   alt={item.caption}
                   fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
                 {item.moment?.tags && item.moment.tags.length > 0 && (
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-                    <Badge className="bg-background/90 text-foreground backdrop-blur border text-[11px]">
+                    <Badge className="bg-background/90 text-foreground backdrop-blur border text-[11px] font-normal">
                       #{item.moment.tags[0]}
                     </Badge>
                   </div>
@@ -126,7 +126,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
               </div>
 
               <CardContent className="p-4 flex-1 flex flex-col justify-between">
-                <p className="text-sm font-medium line-clamp-2 text-foreground mb-3">
+                <p className="text-sm font-medium leading-snug line-clamp-2 text-foreground mb-2">
                   {item.caption}
                 </p>
               </CardContent>
@@ -157,7 +157,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
           {activePhoto && (
             <>
               <DialogHeader className="p-6 pb-2 border-b">
-                <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                <DialogTitle className="text-xl font-serif font-bold flex items-center gap-2">
                   <Sparkles className="size-5 text-primary" />
                   {activePhoto.caption}
                 </DialogTitle>

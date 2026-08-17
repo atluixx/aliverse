@@ -58,13 +58,13 @@ function UsersSkeleton() {
 
 export default function AdminUsersPage() {
   return (
-    <div className="container mx-auto px-4 py-8 flex flex-col gap-8">
-      <div className="flex flex-col gap-2 border-b pb-6">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold w-fit">
+    <div className="container max-w-6xl mx-auto px-4 py-10 flex flex-col gap-8">
+      <div className="flex flex-col gap-2.5 border-b pb-6">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium w-fit">
           <Shield className="size-3.5" /> Admin Security Console
         </div>
-        <h1 className="text-2xl font-bold tracking-tight">Admin & User Privilege Management</h1>
-        <p className="text-sm text-muted-foreground">
+        <h1 className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-foreground">Admin & User Privilege Management</h1>
+        <p className="text-sm text-muted-foreground leading-relaxed">
           Promote community contributors to Administrators, manage roles, or create new admin accounts.
         </p>
       </div>

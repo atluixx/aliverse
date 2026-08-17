@@ -61,24 +61,24 @@ function GallerySkeleton() {
 
 export default function GalleryPage() {
   return (
-    <div className="container mx-auto px-4 py-8 flex flex-col gap-8">
+    <div className="container max-w-6xl mx-auto px-4 py-10 flex flex-col gap-10">
       {/* Hero Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b pb-8">
-        <div className="flex flex-col gap-2 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold w-fit">
+        <div className="flex flex-col gap-3 max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium w-fit">
             <Sparkles className="size-3.5" /> Welcome to Aliverso
           </div>
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">
+          <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight text-foreground">
             The Shared Universe Gallery
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg">
+          <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
             A curated collection of photos, memories, and moments centered around Ali. 
             Submitted by the community, approved by admins.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <Link href="/submit" className={buttonVariants({ size: "lg", className: "gap-2 shadow-md" })}>
+          <Link href="/submit" className={buttonVariants({ size: "lg", className: "gap-2 shadow-xs" })}>
             <Upload data-icon="inline-start" />
             Submit Your Photo
           </Link>

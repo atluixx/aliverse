@@ -65,33 +65,17 @@ function SignInForm() {
           <Button
             type="button"
             variant="outline"
-            className="flex flex-col items-center gap-1.5 h-auto py-3 border-amber-500/40 hover:bg-amber-50 dark:hover:bg-amber-950/30 text-left"
+            className="flex flex-col items-center gap-1.5 h-auto py-3 border-primary/30 hover:bg-primary/5 text-left col-span-2"
             onClick={() => {
               setUsername("ali");
-              setPassword("ali123");
+              setPassword("alidoaliverso");
             }}
           >
-            <div className="flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400 text-xs">
+            <div className="flex items-center gap-1.5 font-medium text-primary text-xs">
               <Shield className="size-3.5" />
-              Ali (Admin)
+              Sign in as Ali (Admin)
             </div>
-            <span className="text-[10px] text-muted-foreground">ali / ali123</span>
-          </Button>
-
-          <Button
-            type="button"
-            variant="outline"
-            className="flex flex-col items-center gap-1.5 h-auto py-3 text-left"
-            onClick={() => {
-              setUsername("contributor");
-              setPassword("user123");
-            }}
-          >
-            <div className="flex items-center gap-1 font-semibold text-xs">
-              <User className="size-3.5" />
-              Contributor
-            </div>
-            <span className="text-[10px] text-muted-foreground">contributor / user123</span>
+            <span className="text-[10px] text-muted-foreground">ali@aliverso.com / alidoaliverso</span>
           </Button>
         </div>
       </div>
@@ -112,7 +96,7 @@ function SignInForm() {
           <Input
             id="username"
             type="text"
-            placeholder="ali or user@aliverso.com"
+            placeholder="ali or ali@aliverso.com"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -155,14 +139,14 @@ function SignInSkeleton() {
 export default function SignInPage() {
   return (
     <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-10rem)] px-4 py-8">
-      <Card className="w-full max-w-md shadow-xl border-border">
+      <Card className="w-full max-w-md shadow-xs border-border">
         <CardHeader className="text-center pb-4">
-          <div className="mx-auto size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-2">
-            <Sparkles className="size-6" />
+          <div className="mx-auto size-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-2">
+            <Sparkles className="size-5" />
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome to Aliverso</CardTitle>
+          <CardTitle className="text-2xl font-serif font-bold">Welcome to Aliverso</CardTitle>
           <CardDescription>
-            Sign in with your username and password to submit photos.
+            Sign in with your credentials to submit photos to the community gallery.
           </CardDescription>
         </CardHeader>
 

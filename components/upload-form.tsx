@@ -94,11 +94,11 @@ export function UploadForm({ moments }: UploadFormProps) {
   return (
     <Card className="w-full max-w-xl mx-auto shadow-md">
       <CardHeader>
-        <CardTitle className="text-xl flex items-center gap-2">
+        <CardTitle className="text-2xl font-serif font-bold flex items-center gap-2.5">
           <Sparkles className="size-5 text-primary" />
           Submit a Photo to Aliverso
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-sm text-muted-foreground leading-relaxed">
           Share your favorite photo for the Ali Universe gallery. All photos are reviewed by admins before appearing publicly.
         </CardDescription>
       </CardHeader>

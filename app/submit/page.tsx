@@ -37,7 +37,7 @@ function SubmitSkeleton() {
 
 export default function SubmitPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container max-w-4xl mx-auto px-4 py-10">
       <Suspense fallback={<SubmitSkeleton />}>
         <SubmitData />
       </Suspense>

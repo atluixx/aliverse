@@ -160,12 +160,12 @@ function SignUpSkeleton() {
 export default function SignUpPage() {
   return (
     <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-10rem)] px-4 py-8">
-      <Card className="w-full max-w-md shadow-xl border-border">
+      <Card className="w-full max-w-md shadow-xs border-border">
         <CardHeader className="text-center pb-4">
-          <div className="mx-auto size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-2">
-            <Sparkles className="size-6" />
+          <div className="mx-auto size-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-2">
+            <Sparkles className="size-5" />
           </div>
-          <CardTitle className="text-2xl font-bold">Join the Aliverso</CardTitle>
+          <CardTitle className="text-2xl font-serif font-bold">Join the Aliverso</CardTitle>
           <CardDescription>
             Create your username and password to submit photos to the community gallery.
           </CardDescription>

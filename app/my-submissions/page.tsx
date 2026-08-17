@@ -75,13 +75,13 @@ async function ProfileData() {
 
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold">{userProfile.name || `@${userProfile.username}`}</h2>
+                  <h2 className="text-2xl font-serif font-bold">{userProfile.name || `@${userProfile.username}`}</h2>
                   {userProfile.role === "ADMIN" ? (
-                    <Badge className="bg-amber-500 hover:bg-amber-600 text-white gap-1 text-xs">
+                    <Badge className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1 text-xs font-normal">
                       <Shield className="size-3" /> Admin
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs font-normal">
                       User
                     </Badge>
                   )}
@@ -133,7 +133,7 @@ async function ProfileData() {
       {/* Submissions Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
         <div>
-          <h3 className="text-lg font-bold tracking-tight flex items-center gap-2">
+          <h3 className="text-xl font-serif font-bold tracking-tight flex items-center gap-2">
             <UserCheck className="size-5 text-primary" />
             Submitted Photos
           </h3>
@@ -164,7 +164,7 @@ function ProfileSkeleton() {
 
 export default function MySubmissionsPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container max-w-5xl mx-auto px-4 py-10">
       <Suspense fallback={<ProfileSkeleton />}>
         <ProfileData />
       </Suspense>

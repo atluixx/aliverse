@@ -38,9 +38,9 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Brand Logo */}
-        <Link href="/gallery" className="flex items-center gap-2 text-xl font-bold tracking-tight text-primary">
-          <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <Sparkles className="size-5" />
+        <Link href="/gallery" className="flex items-center gap-2.5 text-xl font-serif font-bold tracking-tight text-foreground hover:text-primary transition-colors">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
+            <Sparkles className="size-4" />
           </div>
           <span>Aliverso</span>
         </Link>
