@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -23,14 +25,19 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Trash2,
 } from "lucide-react";
+import { deleteSubmission } from "@/lib/actions/submissions";
+import { toast } from "sonner";
 
 interface SubmissionItem {
   id: string;
+  userId: string;
   imageUrl: string;
   caption: string;
   submittedAt: Date | string;
   user: {
+    id?: string;
     username?: string | null;
     name?: string | null;
   };
@@ -46,12 +53,17 @@ interface GalleryGridProps {
 }
 
 export function GalleryGrid({ submissions }: GalleryGridProps) {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const currentUser = session?.user;
+
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Pagination state
+  // Pagination state (Default 10, options 10/20/30/50/100)
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(9);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
   // Extract all unique tags
   const allTags = Array.from(
@@ -82,6 +94,33 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
     activePhotoIndex !== null && activePhotoIndex < filteredSubmissions.length
       ? filteredSubmissions[activePhotoIndex]
       : null;
+
+  const canDelete = (photo: SubmissionItem) => {
+    if (!currentUser) return false;
+    return currentUser.role === "ADMIN" || currentUser.id === photo.userId;
+  };
+
+  const handleDelete = async (photoId: string) => {
+    if (!confirm("Are you sure you want to delete this photo?")) return;
+
+    setDeletingId(photoId);
+    try {
+      const res = await deleteSubmission(photoId);
+      if (res?.error) {
+        toast.error(res.error);
+      } else {
+        toast.success("Photo deleted successfully.");
+        if (activePhotoIndex !== null) {
+          setActivePhotoIndex(null);
+        }
+        router.refresh();
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete photo.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const handlePrev = useCallback(() => {
     setActivePhotoIndex((prev) => {
@@ -126,7 +165,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
 
   return (
     <div id="gallery-grid-anchor" className="flex flex-col gap-8">
-      {/* Tag Filters & Per-Page Controls */}
+      {/* Tag Filters & Per-Page Controls (10/20/30/50/100) */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b">
         {allTags.length > 0 ? (
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -155,16 +194,16 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
           <div />
         )}
 
-        {/* Per-Page Limit Selectors */}
+        {/* Per-Page Limit Selectors (10, 20, 30, 50, 100) */}
         {filteredSubmissions.length > 0 && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0 self-end sm:self-auto">
-            <span className="font-medium">Per page:</span>
-            {[9, 18, 27].map((limit) => (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0 self-end sm:self-auto">
+            <span className="font-medium mr-1">Per page:</span>
+            {[10, 20, 30, 50, 100].map((limit) => (
               <Button
                 key={limit}
                 variant={itemsPerPage === limit ? "secondary" : "ghost"}
                 size="sm"
-                className="h-8 px-2.5 text-xs font-mono rounded-md"
+                className="h-8 px-2 text-xs font-mono rounded-md"
                 onClick={() => setItemsPerPage(limit)}
               >
                 {limit}
@@ -197,15 +236,16 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
             const globalIndex = startIndex + pageItemIndex;
             const photoNumber = globalIndex + 1;
             const author = item.user.username ? `@${item.user.username}` : item.user.name || "Anonymous";
+            const userCanDelete = canDelete(item);
 
             return (
-              <div key={item.id} className="flex flex-col group">
+              <div key={item.id} className="flex flex-col group relative">
                 {/* Photo Card Container (Contains ONLY the photo image) */}
                 <Card
                   tabIndex={0}
                   role="button"
                   aria-label={`View photo #${photoNumber}: ${item.caption}`}
-                  className="overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-lg border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none p-0 rounded-2xl"
+                  className="overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-lg border-border focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none p-0 rounded-2xl relative"
                   onClick={() => setActivePhotoIndex(globalIndex)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -224,6 +264,24 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                     />
                   </div>
                 </Card>
+
+                {/* Owner/Admin Delete Button Overlay */}
+                {userCanDelete && (
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    disabled={deletingId === item.id}
+                    className="absolute top-2.5 right-2.5 z-10 size-8 rounded-full shadow-md opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(item.id);
+                    }}
+                    title="Delete photo"
+                    aria-label={`Delete photo #${photoNumber}`}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                )}
 
                 {/* H2 Title and Author Handle Outside Card */}
                 <div className="mt-3 flex flex-col gap-1 px-1">
@@ -399,15 +457,30 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                     </div>
                   </div>
 
-                  {activePhoto.moment?.tags && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {activePhoto.moment.tags.map((tag) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          #{tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {canDelete(activePhoto) && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={deletingId === activePhoto.id}
+                        onClick={() => handleDelete(activePhoto.id)}
+                        className="gap-1.5 h-8 text-xs font-semibold cursor-pointer"
+                      >
+                        <Trash2 className="size-3.5" />
+                        Delete Photo
+                      </Button>
+                    )}
+
+                    {activePhoto.moment?.tags && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {activePhoto.moment.tags.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs">
+                            #{tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {activePhoto.moment?.caption && (
