@@ -1,18 +1,19 @@
+import { Suspense } from "react";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { AdminUsersTable } from "@/components/admin-users-table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Shield } from "lucide-react";
 
-export const instant = false;
 
 export const metadata = {
   title: "Manage Admins & Users — Aliverso",
   description: "Manage system administrator privileges and user roles.",
 };
 
-export default async function AdminUsersPage() {
+async function AdminUsersData() {
   const session = await auth();
 
   if (!session?.user) {
@@ -43,6 +44,19 @@ export default async function AdminUsersPage() {
     },
   });
 
+  return <AdminUsersTable initialUsers={users} currentUserId={session.user.id} />;
+}
+
+function UsersSkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Skeleton className="h-20 w-full rounded-xl" />
+      <Skeleton className="h-64 w-full rounded-xl" />
+    </div>
+  );
+}
+
+export default function AdminUsersPage() {
   return (
     <div className="container mx-auto px-4 py-8 flex flex-col gap-8">
       <div className="flex flex-col gap-2 border-b pb-6">
@@ -55,7 +69,9 @@ export default async function AdminUsersPage() {
         </p>
       </div>
 
-      <AdminUsersTable initialUsers={users} currentUserId={session.user.id} />
+      <Suspense fallback={<UsersSkeleton />}>
+        <AdminUsersData />
+      </Suspense>
     </div>
   );
 }

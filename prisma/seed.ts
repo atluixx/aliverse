@@ -4,63 +4,40 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Seeding database (clean gallery mode)...");
+  console.log("Seeding database (Pure Production Mode)...");
 
-  // Clear any old mock submissions
+  // Delete all existing mock submissions, moments, and non-admin users
   await prisma.submission.deleteMany({});
+  await prisma.moment.deleteMany({});
+  await prisma.user.deleteMany({
+    where: {
+      email: {
+        not: "ali@aliverso.com",
+      },
+    },
+  });
 
-  const adminPasswordHash = await bcrypt.hash("ali123", 10);
-  const userPasswordHash = await bcrypt.hash("user123", 10);
+  const aliPasswordHash = await bcrypt.hash("alidoaliverso", 10);
 
-  // Seed Admin user (Ali)
+  // Seed ONLY Ali Admin user
   await prisma.user.upsert({
     where: { email: "ali@aliverso.com" },
     update: {
       username: "ali",
+      name: "Ali",
+      password: aliPasswordHash,
       role: Role.ADMIN,
-      password: adminPasswordHash,
     },
     create: {
       username: "ali",
       name: "Ali",
       email: "ali@aliverso.com",
-      password: adminPasswordHash,
+      password: aliPasswordHash,
       role: Role.ADMIN,
     },
   });
 
-  // Seed standard user
-  await prisma.user.upsert({
-    where: { email: "user@aliverso.com" },
-    update: {
-      username: "contributor",
-      role: Role.USER,
-      password: userPasswordHash,
-    },
-    create: {
-      username: "contributor",
-      name: "Universe Contributor",
-      email: "user@aliverso.com",
-      password: userPasswordHash,
-      role: Role.USER,
-    },
-  });
-
-  // Seed standard moments categories
-  const moments = [
-    { caption: "Ali in Paris - Sunset near Eiffel Tower", tags: ["travel", "paris", "eiffel"] },
-    { caption: "Ali Keynote at AI Summit 2026", tags: ["tech", "ai", "keynote"] },
-    { caption: "Aliverso Annual Celebration", tags: ["party", "friends", "aliverso"] },
-  ];
-
-  for (const m of moments) {
-    const existing = await prisma.moment.findFirst({ where: { caption: m.caption } });
-    if (!existing) {
-      await prisma.moment.create({ data: m });
-    }
-  }
-
-  console.log("Database clean seed completed successfully.");
+  console.log("Database seeded: Only Ali Admin exists (ali@aliverso.com / password: 'alidoaliverso').");
 }
 
 main()

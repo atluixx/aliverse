@@ -1,18 +1,19 @@
+import { Suspense } from "react";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { AdminReviewTable } from "@/components/admin-review-table";
-import { Shield, Sparkles } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Shield } from "lucide-react";
 
-export const instant = false;
 
 export const metadata = {
   title: "Admin Review Dashboard — Aliverso",
   description: "Moderate and approve photo submissions for the Aliverso gallery.",
 };
 
-export default async function AdminReviewPage() {
+async function AdminReviewData() {
   const session = await auth();
 
   if (!session?.user) {
@@ -49,6 +50,19 @@ export default async function AdminReviewPage() {
     },
   });
 
+  return <AdminReviewTable initialSubmissions={submissions} />;
+}
+
+function AdminSkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Skeleton className="h-20 w-full rounded-xl" />
+      <Skeleton className="h-64 w-full rounded-xl" />
+    </div>
+  );
+}
+
+export default function AdminReviewPage() {
   return (
     <div className="container mx-auto px-4 py-8 flex flex-col gap-8">
       <div className="flex flex-col gap-2 border-b pb-6">
@@ -61,7 +75,9 @@ export default async function AdminReviewPage() {
         </p>
       </div>
 
-      <AdminReviewTable initialSubmissions={submissions} />
+      <Suspense fallback={<AdminSkeleton />}>
+        <AdminReviewData />
+      </Suspense>
     </div>
   );
 }

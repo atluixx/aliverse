@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
@@ -7,17 +8,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { Upload, UserCheck, Shield, Mail, Calendar, CheckCircle2, Clock, XCircle, User as UserIcon } from "lucide-react";
+import { Upload, UserCheck, Shield, Mail, Calendar, CheckCircle2, Clock, XCircle } from "lucide-react";
 
-export const instant = false;
 
 export const metadata = {
   title: "Profile & Submissions — Aliverso",
   description: "View your user profile and track your photo submissions.",
 };
 
-export default async function MySubmissionsPage() {
+async function ProfileData() {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -59,7 +60,7 @@ export default async function MySubmissionsPage() {
   const rejectedCount = submissions.filter((s) => s.status === "REJECTED").length;
 
   return (
-    <div className="container mx-auto px-4 py-8 flex flex-col gap-8">
+    <div className="flex flex-col gap-8">
       {/* Profile Overview Card */}
       {userProfile && (
         <Card className="overflow-hidden border shadow-sm">
@@ -148,6 +149,25 @@ export default async function MySubmissionsPage() {
       </div>
 
       <UserSubmissionsList submissions={submissions} />
+    </div>
+  );
+}
+
+function ProfileSkeleton() {
+  return (
+    <div className="flex flex-col gap-6">
+      <Skeleton className="h-28 w-full rounded-xl" />
+      <Skeleton className="h-64 w-full rounded-xl" />
+    </div>
+  );
+}
+
+export default function MySubmissionsPage() {
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <Suspense fallback={<ProfileSkeleton />}>
+        <ProfileData />
+      </Suspense>
     </div>
   );
 }
