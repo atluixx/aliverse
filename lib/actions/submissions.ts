@@ -20,20 +20,27 @@ export async function createSubmission(data: {
     throw new Error("Image and caption are required.");
   }
 
-  const submission = await db.submission.create({
-    data: {
-      userId: session.user.id,
-      imageUrl: data.imageUrl,
-      caption: data.caption.trim(),
-      momentId: data.momentId || null,
-      status: SubmissionStatus.PENDING,
-    },
-  });
+  const validMomentId = (data.momentId && data.momentId !== "none") ? data.momentId : null;
 
-  revalidatePath("/my-submissions");
-  revalidatePath("/admin/review");
+  try {
+    const submission = await db.submission.create({
+      data: {
+        userId: session.user.id,
+        imageUrl: data.imageUrl,
+        caption: data.caption.trim(),
+        momentId: validMomentId,
+        status: SubmissionStatus.PENDING,
+      },
+    });
 
-  return { success: true, submissionId: submission.id };
+    revalidatePath("/my-submissions");
+    revalidatePath("/admin/review");
+
+    return { success: true, submissionId: submission.id };
+  } catch (err: any) {
+    console.error("Error creating submission in DB:", err);
+    throw new Error(err.message || "Failed to save submission to database.");
+  }
 }
 
 export async function approveSubmission(submissionId: string) {

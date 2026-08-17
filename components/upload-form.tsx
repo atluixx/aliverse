@@ -75,10 +75,11 @@ export function UploadForm({ moments }: UploadFormProps) {
       const finalImageUrl = data.url;
 
       // Create submission row in DB via Server Action
+      const cleanMomentId = (momentId && momentId !== "none") ? momentId : undefined;
       await createSubmission({
         imageUrl: finalImageUrl,
         caption: caption.trim(),
-        momentId: momentId || undefined,
+        momentId: cleanMomentId,
       });
 
       toast.success("Photo submitted for admin review!", { id: "uploading" });

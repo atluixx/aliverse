@@ -1,4 +1,4 @@
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
@@ -11,7 +11,6 @@ export async function POST(request: Request): Promise<NextResponse> {
 
   const contentType = request.headers.get("content-type") || "";
 
-  // Handle direct file upload via FormData (Data URL fallback for serverless compatibility)
   if (contentType.includes("multipart/form-data")) {
     try {
       const formData = await request.formData();
@@ -21,6 +20,16 @@ export async function POST(request: Request): Promise<NextResponse> {
         return NextResponse.json({ error: "No file provided" }, { status: 400 });
       }
 
+      // If Vercel Blob storage is configured, upload directly to Vercel Blob CDN
+      if (process.env.BLOB_READ_WRITE_TOKEN) {
+        const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+        const blob = await put(`submissions/${Date.now()}-${cleanName}`, file, {
+          access: "public",
+        });
+        return NextResponse.json({ url: blob.url });
+      }
+
+      // Fallback: Data URL (for local development or environments without Blob storage)
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const mimeType = file.type || "image/jpeg";
@@ -29,41 +38,13 @@ export async function POST(request: Request): Promise<NextResponse> {
 
       return NextResponse.json({ url: dataUrl });
     } catch (err: any) {
-      console.error("Data URL upload error:", err);
+      console.error("Upload route error:", err);
       return NextResponse.json({ error: err.message || "Upload processing failed" }, { status: 500 });
     }
   }
 
-  // Vercel Blob Handle Upload for production direct client upload if token exists
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
-    try {
-      const body = (await request.json()) as HandleUploadBody;
-      const jsonResponse = await handleUpload({
-        body,
-        request,
-        onBeforeGenerateToken: async () => {
-          return {
-            allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "image/gif"],
-            maximumSizeInBytes: 15 * 1024 * 1024,
-            tokenPayload: JSON.stringify({ userId: session.user.id }),
-          };
-        },
-        onUploadCompleted: async ({ blob }) => {
-          console.log("Blob upload completed:", blob.url);
-        },
-      });
-
-      return NextResponse.json(jsonResponse);
-    } catch (error) {
-      return NextResponse.json(
-        { error: (error as Error).message },
-        { status: 400 }
-      );
-    }
-  }
-
   return NextResponse.json(
-    { error: "Vercel Blob storage is not configured, please upload via form data." },
+    { error: "Invalid upload request content type." },
     { status: 400 }
   );
 }
