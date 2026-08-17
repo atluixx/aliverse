@@ -36,9 +36,8 @@ async function AdminReviewData() {
       reviewedAt: true,
       user: {
         select: {
+          username: true,
           name: true,
-          email: true,
-          image: true,
         },
       },
       reviewer: {

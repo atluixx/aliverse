@@ -5,13 +5,11 @@ import { redirect } from "next/navigation";
 import { UserSubmissionsList } from "@/components/user-submissions-list";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { Upload, UserCheck, Shield, Mail, Calendar, CheckCircle2, Clock, XCircle } from "lucide-react";
-
+import { Upload, UserCheck, Shield, Calendar, CheckCircle2, Clock, XCircle, User as UserIcon } from "lucide-react";
 
 export const metadata = {
   title: "Profile & Submissions — Aliverso",
@@ -31,8 +29,6 @@ async function ProfileData() {
       id: true,
       name: true,
       username: true,
-      email: true,
-      image: true,
       role: true,
       createdAt: true,
     },
@@ -66,16 +62,15 @@ async function ProfileData() {
         <Card className="overflow-hidden border shadow-sm">
           <CardContent className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <Avatar className="size-16 border border-border">
-                <AvatarImage src={userProfile.image || undefined} alt={userProfile.name || "User"} />
-                <AvatarFallback className="text-lg font-bold">
-                  {userProfile.name?.charAt(0) || userProfile.username?.charAt(0) || "U"}
-                </AvatarFallback>
-              </Avatar>
+              <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <UserIcon className="size-6" />
+              </div>
 
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-serif font-bold">{userProfile.name || `@${userProfile.username}`}</h2>
+                  <h2 className="text-2xl font-serif font-bold">
+                    {userProfile.username ? `@${userProfile.username}` : userProfile.name || "User"}
+                  </h2>
                   {userProfile.role === "ADMIN" ? (
                     <Badge className="bg-primary hover:bg-primary/90 text-primary-foreground gap-1 text-xs font-normal">
                       <Shield className="size-3" /> Admin
@@ -87,15 +82,7 @@ async function ProfileData() {
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                  {userProfile.username && (
-                    <span className="font-mono text-foreground">@{userProfile.username}</span>
-                  )}
-                  {userProfile.email && (
-                    <span className="flex items-center gap-1">
-                      <Mail className="size-3" /> {userProfile.email}
-                    </span>
-                  )}
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="size-3" /> Joined {new Date(userProfile.createdAt).toLocaleDateString()}
                   </span>

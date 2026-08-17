@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -16,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Sparkles, Upload, Shield, Images, UserCheck, LogOut, LogIn, UserPlus, Users, User, Menu, X } from "lucide-react";
+import { Sparkles, Upload, Shield, Images, UserCheck, LogOut, LogIn, UserPlus, Users, User as UserIcon, Menu, X } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -40,6 +39,8 @@ export function Navbar() {
     navItems.push({ href: "/admin/review", label: "Moderation", icon: Shield });
     navItems.push({ href: "/admin/users", label: "Manage Admins", icon: Users });
   }
+
+  const usernameDisplay = user?.username ? `@${user.username}` : user?.name || "User";
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-all">
@@ -97,33 +98,28 @@ export function Navbar() {
         <div className="flex items-center gap-2 sm:gap-3">
           {status === "authenticated" && user ? (
             <DropdownMenu>
-              <DropdownMenuTrigger className="relative flex items-center justify-center size-11 rounded-full p-0.5 focus-visible:ring-2 focus-visible:ring-ring outline-none cursor-pointer hover:opacity-95 transition-opacity">
-                <Avatar className="size-10 border border-border shadow-xs">
-                  <AvatarImage src={user.image || undefined} alt={user.name || "User"} />
-                  <AvatarFallback className="font-semibold text-xs">{user.name?.substring(0, 2).toUpperCase() || user.username?.substring(0, 2).toUpperCase() || "AL"}</AvatarFallback>
-                </Avatar>
+              <DropdownMenuTrigger className="relative flex items-center gap-2 h-10 px-3.5 rounded-full border bg-muted/50 hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring outline-none cursor-pointer transition-colors text-xs font-semibold">
+                <UserIcon className="size-4 text-primary" />
+                <span>{usernameDisplay}</span>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 p-2 shadow-lg rounded-xl">
+              <DropdownMenuContent align="end" className="w-60 p-2 shadow-lg rounded-xl">
                 <DropdownMenuLabel className="font-normal px-2 py-1.5">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium leading-none">{user.name || `@${user.username}`}</p>
-                      {isAdmin ? (
-                        <Badge variant="default" className="text-[10px] bg-amber-500 hover:bg-amber-600">
-                          ADMIN
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-[10px]">
-                          USER
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs leading-none text-muted-foreground truncate mt-0.5">{user.email}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold leading-none">{usernameDisplay}</p>
+                    {isAdmin ? (
+                      <Badge variant="default" className="text-[10px] bg-amber-500 hover:bg-amber-600">
+                        ADMIN
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px]">
+                        USER
+                      </Badge>
+                    )}
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem render={<Link href="/my-submissions" className="w-full flex items-center gap-2.5 py-2.5 min-h-[44px]" />}>
-                  <User className="size-4 text-muted-foreground" /> My Profile & Submissions
+                  <UserIcon className="size-4 text-muted-foreground" /> My Profile & Submissions
                 </DropdownMenuItem>
                 <DropdownMenuItem render={<Link href="/submit" className="w-full flex items-center gap-2.5 py-2.5 min-h-[44px]" />}>
                   <Upload className="size-4 text-muted-foreground" /> Submit Photo

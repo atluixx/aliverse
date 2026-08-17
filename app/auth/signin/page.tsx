@@ -61,11 +61,11 @@ function SignInForm() {
       {/* Username & Password Form */}
       <form onSubmit={handleSignIn} className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="username">Username or Email</Label>
+          <Label htmlFor="username">Username</Label>
           <Input
             id="username"
             type="text"
-            placeholder="ali or ali@aliverso.com"
+            placeholder="e.g. cosmic_ali"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required

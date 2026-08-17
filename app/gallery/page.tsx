@@ -27,9 +27,8 @@ async function GalleryData() {
       submittedAt: true,
       user: {
         select: {
+          username: true,
           name: true,
-          image: true,
-          email: true,
         },
       },
       moment: {

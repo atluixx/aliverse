@@ -31,8 +31,6 @@ async function AdminUsersData() {
       id: true,
       username: true,
       name: true,
-      email: true,
-      image: true,
       role: true,
       createdAt: true,
       _count: {

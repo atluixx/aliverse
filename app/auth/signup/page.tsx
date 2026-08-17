@@ -11,13 +11,12 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { registerUser } from "@/lib/actions/auth";
-import { Sparkles, UserPlus, Loader2, ArrowLeft } from "lucide-react";
+import { Sparkles, UserPlus, Loader2 } from "lucide-react";
 
 function SignUpForm() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -38,23 +37,26 @@ function SignUpForm() {
     toast.loading("Creating your Aliverso account...", { id: "register" });
 
     try {
-      await registerUser({
+      const res = await registerUser({
         username,
         name: name.trim() || undefined,
-        email: email.trim() || undefined,
         password,
       });
+
+      if (res?.error) {
+        throw new Error(res.error);
+      }
 
       toast.success("Account created successfully! Signing in...", { id: "register" });
 
       // Automatically sign in
-      const res = await signIn("credentials", {
+      const signinRes = await signIn("credentials", {
         username,
         password,
         redirect: false,
       });
 
-      if (res?.error) {
+      if (signinRes?.error) {
         router.push("/auth/signin");
       } else {
         router.push("/gallery");
@@ -90,18 +92,6 @@ function SignUpForm() {
             placeholder="e.g. Ali Fan"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            disabled={loading}
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="email">Email Address (Optional)</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="your.email@example.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
           />
         </div>
@@ -149,7 +139,6 @@ function SignUpForm() {
 function SignUpSkeleton() {
   return (
     <CardContent className="flex flex-col gap-4">
-      <Skeleton className="h-10 w-full" />
       <Skeleton className="h-10 w-full" />
       <Skeleton className="h-10 w-full" />
       <Skeleton className="h-10 w-full" />

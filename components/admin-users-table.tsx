@@ -5,10 +5,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -27,14 +26,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { updateUserRole, createAdminUser } from "@/lib/actions/users";
-import { Shield, ShieldAlert, UserCheck, UserPlus, Search, MoreVertical, Loader2, Calendar } from "lucide-react";
+import { Shield, ShieldAlert, UserPlus, Search, MoreVertical, Loader2, User as UserIcon } from "lucide-react";
 
 interface AdminUserItem {
   id: string;
   username: string | null;
   name: string | null;
-  email: string | null;
-  image: string | null;
   role: "USER" | "ADMIN";
   createdAt: Date | string;
   _count?: {
@@ -56,7 +53,6 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
   // New admin form state
   const [newUsername, setNewUsername] = useState("");
   const [newName, setNewName] = useState("");
-  const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
@@ -103,7 +99,6 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
       const res = await createAdminUser({
         username: newUsername,
         name: newName || undefined,
-        email: newEmail || undefined,
         password: newPassword,
       });
 
@@ -120,8 +115,6 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
             id: res.user.id,
             username: res.user.username,
             name: res.user.name,
-            email: res.user.email,
-            image: res.user.image,
             role: "ADMIN",
             createdAt: new Date(),
           },
@@ -132,7 +125,6 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
       setIsAddModalOpen(false);
       setNewUsername("");
       setNewName("");
-      setNewEmail("");
       setNewPassword("");
     } catch (err: any) {
       toast.error(err.message || "Failed to create admin.", { id: "createAdmin" });
@@ -142,33 +134,31 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
   };
 
   const filteredUsers = users.filter((u) => {
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
     return (
-      (u.username && u.username.toLowerCase().includes(q)) ||
-      (u.name && u.name.toLowerCase().includes(q)) ||
-      (u.email && u.email.toLowerCase().includes(q))
+      u.username?.toLowerCase().includes(q) ||
+      u.name?.toLowerCase().includes(q)
     );
   });
 
-  const totalAdmins = users.filter((u) => u.role === "ADMIN").length;
-  const totalUsers = users.filter((u) => u.role === "USER").length;
+  const totalUsers = users.length;
+  const adminCount = users.filter((u) => u.role === "ADMIN").length;
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Overview Cards & Add Button */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="rounded-lg border px-4 py-2 bg-card">
-            <span className="text-xs text-muted-foreground">Total Users</span>
-            <p className="text-xl font-bold">{users.length}</p>
-          </div>
-          <div className="rounded-lg border px-4 py-2 bg-amber-500/5 dark:bg-amber-500/10 border-amber-500/20">
-            <span className="text-xs text-amber-900 dark:text-amber-200 font-medium">Admins</span>
-            <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{totalAdmins}</p>
-          </div>
+      {/* Overview Stats & Action Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="px-3 py-1 text-xs gap-1.5 bg-background">
+            <UserIcon className="size-3.5 text-primary" /> Total Users: <strong className="text-foreground">{totalUsers}</strong>
+          </Badge>
+          <Badge variant="outline" className="px-3 py-1 text-xs gap-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20">
+            <Shield className="size-3.5" /> Admins: <strong className="text-foreground">{adminCount}</strong>
+          </Badge>
         </div>
 
-        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+        <Button onClick={() => setIsAddModalOpen(true)} className="h-11 px-4 text-xs font-semibold gap-2">
           <UserPlus data-icon="inline-start" />
           Add New Admin
         </Button>
@@ -178,7 +168,7 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
         <Input
-          placeholder="Search by username, name, or email..."
+          placeholder="Search by username or name..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="pl-9"
@@ -192,19 +182,16 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
           {filteredUsers.map((item) => (
             <div key={item.id} className="p-4 flex flex-col gap-3 bg-card">
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <Avatar className="size-10 border">
-                    <AvatarImage src={item.image || undefined} />
-                    <AvatarFallback>{item.name?.charAt(0) || "U"}</AvatarFallback>
-                  </Avatar>
+                <div className="flex items-center gap-2.5">
+                  <UserIcon className="size-4 text-muted-foreground" />
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold leading-tight">
-                      {item.name || "Unnamed User"}
+                    <span className="text-sm font-semibold leading-tight font-mono">
+                      @{item.username || "no_username"}
                       {item.id === currentUserId && (
-                        <span className="ml-1 text-[10px] text-muted-foreground font-normal">(You)</span>
+                        <span className="ml-1.5 text-[10px] text-muted-foreground font-normal font-sans">(You)</span>
                       )}
                     </span>
-                    <span className="text-xs font-mono text-muted-foreground mt-0.5">@{item.username || "no_username"}</span>
+                    {item.name && <span className="text-xs text-muted-foreground">{item.name}</span>}
                   </div>
                 </div>
 
@@ -222,7 +209,6 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
               </div>
 
               <div className="flex flex-col gap-1 text-xs text-muted-foreground pt-1 border-t">
-                {item.email && <p>Email: <span className="text-foreground">{item.email}</span></p>}
                 <p>Joined: <span className="text-foreground">{new Date(item.createdAt).toLocaleDateString()}</span></p>
               </div>
 
@@ -258,9 +244,8 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>User</TableHead>
                 <TableHead>Username</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead>Display Name</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Joined</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -269,29 +254,18 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
             <TableBody>
               {filteredUsers.map((item) => (
                 <TableRow key={item.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar className="size-9 border">
-                        <AvatarImage src={item.image || undefined} />
-                        <AvatarFallback>{item.name?.charAt(0) || "U"}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-semibold leading-none">
-                          {item.name || "Unnamed User"}
-                          {item.id === currentUserId && (
-                            <span className="ml-1 text-[10px] text-muted-foreground font-normal">(You)</span>
-                          )}
-                        </span>
-                      </div>
+                  <TableCell className="font-mono text-sm font-semibold">
+                    <div className="flex items-center gap-2">
+                      <UserIcon className="size-4 text-muted-foreground" />
+                      <span>@{item.username || "no_username"}</span>
+                      {item.id === currentUserId && (
+                        <span className="text-[10px] text-muted-foreground font-normal font-sans">(You)</span>
+                      )}
                     </div>
                   </TableCell>
 
-                  <TableCell className="font-mono text-xs">
-                    @{item.username || "no_username"}
-                  </TableCell>
-
                   <TableCell className="text-sm text-muted-foreground">
-                    {item.email || "—"}
+                    {item.name || "—"}
                   </TableCell>
 
                   <TableCell>
@@ -372,24 +346,12 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="admin-name">Full Name</Label>
+              <Label htmlFor="admin-name">Display Name (Optional)</Label>
               <Input
                 id="admin-name"
-                placeholder="e.g. Co-Admin Name"
+                placeholder="e.g. Ali Co-Admin"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                disabled={isCreating}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="admin-email">Email Address</Label>
-              <Input
-                id="admin-email"
-                type="email"
-                placeholder="coadmin@aliverso.com"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
                 disabled={isCreating}
               />
             </div>

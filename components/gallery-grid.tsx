@@ -5,9 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { buttonVariants } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Sparkles, Calendar, Tag, Upload, Images } from "lucide-react";
+import { Sparkles, Calendar, Tag, Upload, Images, User as UserIcon } from "lucide-react";
 
 interface SubmissionItem {
   id: string;
@@ -23,9 +21,8 @@ interface SubmissionItem {
   caption: string;
   submittedAt: Date | string;
   user: {
-    name: string | null;
-    image: string | null;
-    email: string | null;
+    username?: string | null;
+    name?: string | null;
   };
   moment?: {
     id: string;
@@ -101,61 +98,59 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
         </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSubmissions.map((item) => (
-            <Card
-              key={item.id}
-              tabIndex={0}
-              role="button"
-              aria-label={`View photo titled ${item.caption}`}
-              className="group overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-md border-border flex flex-col justify-between focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none"
-              onClick={() => setActivePhoto(item)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setActivePhoto(item);
-                }
-              }}
-            >
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-                <Image
-                  src={item.imageUrl}
-                  alt={item.caption}
-                  fill
-                  className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-                {item.moment?.tags && item.moment.tags.length > 0 && (
-                  <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-                    <Badge className="bg-background/90 text-foreground backdrop-blur border text-[11px] font-normal shadow-xs">
-                      #{item.moment.tags[0]}
-                    </Badge>
+          {filteredSubmissions.map((item) => {
+            const author = item.user.username ? `@${item.user.username}` : item.user.name || "Anonymous";
+            return (
+              <Card
+                key={item.id}
+                tabIndex={0}
+                role="button"
+                aria-label={`View photo titled ${item.caption}`}
+                className="group overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-md border-border flex flex-col justify-between focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none"
+                onClick={() => setActivePhoto(item)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setActivePhoto(item);
+                  }
+                }}
+              >
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+                  <Image
+                    src={item.imageUrl}
+                    alt={item.caption}
+                    fill
+                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                  {item.moment?.tags && item.moment.tags.length > 0 && (
+                    <div className="absolute top-3 left-3 flex flex-wrap gap-1">
+                      <Badge className="bg-background/90 text-foreground backdrop-blur border text-[11px] font-normal shadow-xs">
+                        #{item.moment.tags[0]}
+                      </Badge>
+                    </div>
+                  )}
+                </div>
+
+                <CardContent className="p-4 flex-1 flex flex-col justify-between">
+                  <p className="text-sm font-medium leading-snug line-clamp-2 text-foreground mb-2 group-hover:text-primary transition-colors">
+                    {item.caption}
+                  </p>
+                </CardContent>
+
+                <CardFooter className="px-4 py-3 border-t bg-muted/20 flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5 font-medium text-foreground truncate max-w-[140px]">
+                    <UserIcon className="size-3.5 text-muted-foreground shrink-0" />
+                    <span className="truncate">{author}</span>
                   </div>
-                )}
-              </div>
-
-              <CardContent className="p-4 flex-1 flex flex-col justify-between">
-                <p className="text-sm font-medium leading-snug line-clamp-2 text-foreground mb-2 group-hover:text-primary transition-colors">
-                  {item.caption}
-                </p>
-              </CardContent>
-
-              <CardFooter className="px-4 py-3 border-t bg-muted/20 flex items-center justify-between text-xs text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <Avatar className="size-6 border shadow-2xs">
-                    <AvatarImage src={item.user.image || undefined} />
-                    <AvatarFallback className="text-[10px] font-semibold">{item.user.name?.charAt(0) || "U"}</AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium text-foreground truncate max-w-[130px]">
-                    {item.user.name || "Anonymous"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <Calendar className="size-3 text-muted-foreground/70" />
-                  <span>{new Date(item.submittedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
-                </div>
-              </CardFooter>
-            </Card>
-          ))}
+                  <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <Calendar className="size-3 text-muted-foreground/70" />
+                    <span>{new Date(item.submittedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
+                  </div>
+                </CardFooter>
+              </Card>
+            );
+          })}
         </div>
       )}
 
@@ -170,7 +165,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                   <span className="line-clamp-1">{activePhoto.caption}</span>
                 </DialogTitle>
                 <DialogDescription className="sr-only">
-                  Detailed view of submission by {activePhoto.user.name}
+                  Detailed view of submission by {activePhoto.user.username || activePhoto.user.name}
                 </DialogDescription>
               </DialogHeader>
 
@@ -190,13 +185,10 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                 </p>
 
                 <div className="flex flex-wrap items-center justify-between gap-4 border-b pb-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="size-10 border">
-                      <AvatarImage src={activePhoto.user.image || undefined} />
-                      <AvatarFallback>{activePhoto.user.name?.charAt(0) || "U"}</AvatarFallback>
-                    </Avatar>
+                  <div className="flex items-center gap-2">
+                    <UserIcon className="size-5 text-primary" />
                     <div>
-                      <p className="text-sm font-semibold">{activePhoto.user.name || "Anonymous Contributor"}</p>
+                      <p className="text-sm font-semibold">{activePhoto.user.username ? `@${activePhoto.user.username}` : activePhoto.user.name || "Anonymous Contributor"}</p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                         <Calendar className="size-3" />
                         Submitted on {new Date(activePhoto.submittedAt).toLocaleDateString(undefined, { dateStyle: "long" })}
