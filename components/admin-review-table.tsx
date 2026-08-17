@@ -133,7 +133,7 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase">Pending Queue</span>
-            <Badge variant="outline" className="border-amber-500 text-amber-600">
+            <Badge variant="outline" className="border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10 h-6 px-2 text-[11px] font-mono">
               {pendingCount}
             </Badge>
           </div>
@@ -149,7 +149,7 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase">Approved Gallery</span>
-            <Badge variant="outline" className="border-emerald-500 text-emerald-600">
+            <Badge variant="outline" className="border-emerald-500/40 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 h-6 px-2 text-[11px] font-mono">
               {approvedCount}
             </Badge>
           </div>
@@ -165,7 +165,7 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground uppercase">Rejected</span>
-            <Badge variant="outline" className="border-rose-500 text-rose-600">
+            <Badge variant="outline" className="border-rose-500/40 text-rose-600 dark:text-rose-400 bg-rose-500/10 h-6 px-2 text-[11px] font-mono">
               {rejectedCount}
             </Badge>
           </div>
@@ -173,20 +173,20 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
         </Card>
       </div>
 
-      {/* Moderation Tabs Bar */}
+      {/* Moderation Tabs Bar (Perfectly centered triggers) */}
       <div className="flex items-center justify-between">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-4 w-full max-w-md h-11">
-            <TabsTrigger value="PENDING" className="text-xs min-h-[36px]">
+          <TabsList className="grid grid-cols-4 w-full max-w-md h-10 p-1 bg-muted/70 rounded-xl">
+            <TabsTrigger value="PENDING" className="text-xs font-medium h-8 inline-flex items-center justify-center rounded-lg">
               Pending ({pendingCount})
             </TabsTrigger>
-            <TabsTrigger value="APPROVED" className="text-xs min-h-[36px]">
+            <TabsTrigger value="APPROVED" className="text-xs font-medium h-8 inline-flex items-center justify-center rounded-lg">
               Approved ({approvedCount})
             </TabsTrigger>
-            <TabsTrigger value="REJECTED" className="text-xs min-h-[36px]">
+            <TabsTrigger value="REJECTED" className="text-xs font-medium h-8 inline-flex items-center justify-center rounded-lg">
               Rejected ({rejectedCount})
             </TabsTrigger>
-            <TabsTrigger value="ALL" className="text-xs min-h-[36px]">
+            <TabsTrigger value="ALL" className="text-xs font-medium h-8 inline-flex items-center justify-center rounded-lg">
               All ({submissions.length})
             </TabsTrigger>
           </TabsList>
@@ -209,8 +209,8 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
                 const userTag = item.user.username ? `@${item.user.username}` : item.user.name || "Anonymous";
                 return (
                   <div key={item.id} className="p-4 flex flex-col gap-3 bg-card">
-                    {/* Item Header: Submitter info & Status */}
-                    <div className="flex items-start justify-between gap-3">
+                    {/* Item Header: Submitter info & Perfectly Centered Compact Status Badge */}
+                    <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         <UserIcon className="size-4 text-muted-foreground" />
                         <span className="text-sm font-semibold leading-tight">{userTag}</span>
@@ -218,19 +218,19 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
 
                       <div>
                         {item.status === "PENDING" && (
-                          <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950/30">
+                          <span className="inline-flex items-center justify-center h-6 px-2.5 text-[11px] font-semibold rounded-full border border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10 leading-none">
                             Pending
-                          </Badge>
+                          </span>
                         )}
                         {item.status === "APPROVED" && (
-                          <Badge variant="outline" className="border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30">
+                          <span className="inline-flex items-center justify-center h-6 px-2.5 text-[11px] font-semibold rounded-full border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 leading-none">
                             Approved
-                          </Badge>
+                          </span>
                         )}
                         {item.status === "REJECTED" && (
-                          <Badge variant="outline" className="border-rose-500 text-rose-600 bg-rose-50 dark:bg-rose-950/30">
+                          <span className="inline-flex items-center justify-center h-6 px-2.5 text-[11px] font-semibold rounded-full border border-rose-500/40 text-rose-600 dark:text-rose-400 bg-rose-500/10 leading-none">
                             Rejected
-                          </Badge>
+                          </span>
                         )}
                       </div>
                     </div>
@@ -256,7 +256,7 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-10 px-3 text-xs gap-1.5"
+                        className="h-9 px-3 text-xs gap-1.5"
                         onClick={() => setPreviewItem(item)}
                       >
                         <Eye className="size-4" />
@@ -267,7 +267,7 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
                         <Button
                           size="sm"
                           variant="default"
-                          className="bg-emerald-600 hover:bg-emerald-700 h-10 px-4 text-xs font-semibold gap-1.5 min-w-[90px]"
+                          className="bg-emerald-600 hover:bg-emerald-700 h-9 px-3.5 text-xs font-semibold gap-1.5 min-w-[84px]"
                           onClick={() => handleApprove(item.id)}
                           disabled={isPending}
                         >
@@ -280,7 +280,7 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
                         <Button
                           size="sm"
                           variant="outline"
-                          className="text-rose-600 border-rose-200 hover:bg-rose-50 h-10 px-3.5 text-xs font-semibold gap-1.5"
+                          className="text-rose-600 border-rose-200 hover:bg-rose-50 h-9 px-3 text-xs font-semibold gap-1.5"
                           onClick={() => handleReject(item.id)}
                           disabled={isPending}
                         >
@@ -290,14 +290,14 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
                       )}
 
                       <DropdownMenu>
-                        <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-10 rounded-lg")}>
+                        <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-9 rounded-lg")}>
                           <MoreVertical className="size-4" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
-                            className="text-destructive focus:text-destructive min-h-[44px]"
+                            className="text-destructive focus:text-destructive min-h-[40px]"
                             onClick={() => handleDelete(item.id)}
                           >
                             <Trash2 data-icon="inline-start" className="size-4" /> Delete Permanently
@@ -359,19 +359,19 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
 
                         <TableCell>
                           {item.status === "PENDING" && (
-                            <Badge variant="outline" className="border-amber-500 text-amber-600 bg-amber-50 dark:bg-amber-950/30">
+                            <span className="inline-flex items-center justify-center h-6 px-2.5 text-[11px] font-semibold rounded-full border border-amber-500/40 text-amber-600 dark:text-amber-400 bg-amber-500/10 leading-none">
                               Pending
-                            </Badge>
+                            </span>
                           )}
                           {item.status === "APPROVED" && (
-                            <Badge variant="outline" className="border-emerald-500 text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30">
+                            <span className="inline-flex items-center justify-center h-6 px-2.5 text-[11px] font-semibold rounded-full border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 leading-none">
                               Approved
-                            </Badge>
+                            </span>
                           )}
                           {item.status === "REJECTED" && (
-                            <Badge variant="outline" className="border-rose-500 text-rose-600 bg-rose-50 dark:bg-rose-950/30">
+                            <span className="inline-flex items-center justify-center h-6 px-2.5 text-[11px] font-semibold rounded-full border border-rose-500/40 text-rose-600 dark:text-rose-400 bg-rose-500/10 leading-none">
                               Rejected
-                            </Badge>
+                            </span>
                           )}
                         </TableCell>
 
@@ -381,7 +381,7 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
                               <Button
                                 size="sm"
                                 variant="default"
-                                className="bg-emerald-600 hover:bg-emerald-700 h-9 px-3 text-xs font-semibold gap-1"
+                                className="bg-emerald-600 hover:bg-emerald-700 h-8 px-3 text-xs font-semibold gap-1"
                                 onClick={() => handleApprove(item.id)}
                                 disabled={isPending}
                               >
@@ -393,7 +393,7 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="text-rose-600 border-rose-200 hover:bg-rose-50 h-9 px-3 text-xs font-semibold gap-1"
+                                className="text-rose-600 border-rose-200 hover:bg-rose-50 h-8 px-3 text-xs font-semibold gap-1"
                                 onClick={() => handleReject(item.id)}
                                 disabled={isPending}
                               >
@@ -402,14 +402,14 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
                             )}
 
                             <DropdownMenu>
-                              <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-9")}>
+                              <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-8 rounded-md")}>
                                 <MoreVertical className="size-4" />
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
-                                  className="text-destructive focus:text-destructive min-h-[44px]"
+                                  className="text-destructive focus:text-destructive min-h-[40px]"
                                   onClick={() => handleDelete(item.id)}
                                 >
                                   <Trash2 data-icon="inline-start" className="size-4" /> Delete Permanently
@@ -434,7 +434,7 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
           {previewItem && (
             <div className="flex flex-col">
               <DialogHeader className="p-4 border-b">
-                <DialogTitle className="text-lg font-serif font-bold">Inspect Photo Submission</DialogTitle>
+                <DialogTitle className="text-lg font-sans font-black tracking-tighter">Inspect Photo Submission</DialogTitle>
                 <DialogDescription>
                   Submitted by {previewItem.user.username ? `@${previewItem.user.username}` : previewItem.user.name || "Anonymous"}
                 </DialogDescription>
@@ -458,7 +458,7 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
                     {previewItem.status !== "APPROVED" && (
                       <Button
                         size="sm"
-                        className="bg-emerald-600 hover:bg-emerald-700 h-9 px-3 text-xs"
+                        className="bg-emerald-600 hover:bg-emerald-700 h-8 px-3 text-xs font-semibold"
                         onClick={() => {
                           handleApprove(previewItem.id);
                           setPreviewItem(null);
@@ -471,7 +471,7 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
                       <Button
                         size="sm"
                         variant="outline"
-                        className="text-rose-600 border-rose-200 hover:bg-rose-50 h-9 px-3 text-xs"
+                        className="text-rose-600 border-rose-200 hover:bg-rose-50 h-8 px-3 text-xs font-semibold"
                         onClick={() => {
                           handleReject(previewItem.id);
                           setPreviewItem(null);

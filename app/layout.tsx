@@ -37,12 +37,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <Navbar />
           <main className="flex-1">{children}</main>
-          <footer className="border-t py-8 text-center text-xs text-muted-foreground bg-muted/30 pb-[max(2rem,env(safe-area-inset-bottom))]">
-            <div className="container max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="font-serif text-sm">Aliverso — Celebrating shared universe moments.</p>
-              <p className="text-muted-foreground">Powered by Next.js, Vercel Blob & Vercel Postgres</p>
-            </div>
-          </footer>
         </Providers>
       </body>
     </html>

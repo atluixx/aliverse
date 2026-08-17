@@ -34,7 +34,7 @@ export async function createSubmission(data: {
     });
 
     revalidatePath("/my-submissions");
-    revalidatePath("/admin/review");
+    revalidatePath("/admin");
 
     return { success: true, submissionId: submission.id };
   } catch (err: any) {
@@ -62,7 +62,7 @@ export async function approveSubmission(submissionId: string): Promise<{ success
 
     revalidatePath("/gallery");
     revalidatePath("/");
-    revalidatePath("/admin/review");
+    revalidatePath("/admin");
     revalidatePath("/my-submissions");
 
     return { success: true, submission: updated };
@@ -91,13 +91,57 @@ export async function rejectSubmission(submissionId: string): Promise<{ success?
 
     revalidatePath("/gallery");
     revalidatePath("/");
-    revalidatePath("/admin/review");
+    revalidatePath("/admin");
     revalidatePath("/my-submissions");
 
     return { success: true, submission: updated };
   } catch (err: any) {
     console.error("Error rejecting submission:", err);
     return { error: err.message || "Failed to reject submission." };
+  }
+}
+
+export async function updateSubmissionCaption(
+  submissionId: string,
+  newCaption: string
+): Promise<{ success?: boolean; error?: string }> {
+  try {
+    const session = await auth();
+
+    if (!session?.user) {
+      return { error: "Unauthorized: You must be signed in." };
+    }
+
+    if (!newCaption || !newCaption.trim()) {
+      return { error: "Title/caption cannot be empty." };
+    }
+
+    const existing = await db.submission.findUnique({
+      where: { id: submissionId },
+      select: { userId: true },
+    });
+
+    if (!existing) {
+      return { error: "Submission not found." };
+    }
+
+    if (existing.userId !== session.user.id && session.user.role !== Role.ADMIN) {
+      return { error: "Forbidden: You cannot edit this title." };
+    }
+
+    await db.submission.update({
+      where: { id: submissionId },
+      data: { caption: newCaption.trim() },
+    });
+
+    revalidatePath("/gallery");
+    revalidatePath("/admin");
+    revalidatePath("/my-submissions");
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("Error updating caption:", err);
+    return { error: err.message || "Failed to update title." };
   }
 }
 
@@ -127,7 +171,7 @@ export async function deleteSubmission(submissionId: string): Promise<{ success?
     });
 
     revalidatePath("/gallery");
-    revalidatePath("/admin/review");
+    revalidatePath("/admin");
     revalidatePath("/my-submissions");
 
     return { success: true };

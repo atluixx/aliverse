@@ -8,12 +8,15 @@ import { useSession } from "next-auth/react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import {
   Calendar,
@@ -26,8 +29,10 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Trash2,
+  Pencil,
+  Loader2,
 } from "lucide-react";
-import { deleteSubmission } from "@/lib/actions/submissions";
+import { deleteSubmission, updateSubmissionCaption } from "@/lib/actions/submissions";
 import { toast } from "sonner";
 
 interface SubmissionItem {
@@ -60,6 +65,11 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Edit Title State
+  const [editingPhoto, setEditingPhoto] = useState<SubmissionItem | null>(null);
+  const [editCaption, setEditCaption] = useState<string>("");
+  const [isUpdatingTitle, setIsUpdatingTitle] = useState<boolean>(false);
 
   // Pagination state (Default 10, options 10/20/30/50/100)
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -95,7 +105,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
       ? filteredSubmissions[activePhotoIndex]
       : null;
 
-  const canDelete = (photo: SubmissionItem) => {
+  const canEditOrDelete = (photo: SubmissionItem) => {
     if (!currentUser) return false;
     return currentUser.role === "ADMIN" || currentUser.id === photo.userId;
   };
@@ -119,6 +129,36 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
       toast.error(err.message || "Failed to delete photo.");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleOpenEditTitle = (photo: SubmissionItem) => {
+    setEditingPhoto(photo);
+    setEditCaption(photo.caption);
+  };
+
+  const handleSaveTitle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPhoto) return;
+    if (!editCaption.trim()) {
+      toast.error("Title cannot be empty.");
+      return;
+    }
+
+    setIsUpdatingTitle(true);
+    try {
+      const res = await updateSubmissionCaption(editingPhoto.id, editCaption.trim());
+      if (res?.error) {
+        toast.error(res.error);
+      } else {
+        toast.success("Photo title updated successfully!");
+        setEditingPhoto(null);
+        router.refresh();
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update title.");
+    } finally {
+      setIsUpdatingTitle(false);
     }
   };
 
@@ -220,7 +260,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
             <Images className="size-6" />
           </div>
           <div className="flex flex-col gap-1.5 max-w-sm">
-            <h3 className="text-xl font-serif font-bold text-foreground">No approved photos yet</h3>
+            <h3 className="text-xl font-sans font-black tracking-tighter text-foreground">No approved photos yet</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
               The public gallery is clean and ready for real photos. Be the first contributor to submit a photo!
             </p>
@@ -236,7 +276,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
             const globalIndex = startIndex + pageItemIndex;
             const photoNumber = filteredSubmissions.length - globalIndex;
             const author = item.user.username ? `@${item.user.username}` : item.user.name || "Anonymous";
-            const userCanDelete = canDelete(item);
+            const userCanModify = canEditOrDelete(item);
 
             return (
               <div key={item.id} className="flex flex-col group relative">
@@ -265,28 +305,44 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                   </div>
                 </Card>
 
-                {/* Owner/Admin Delete Button Overlay */}
-                {userCanDelete && (
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    disabled={deletingId === item.id}
-                    className="absolute top-2.5 right-2.5 z-10 size-8 rounded-full shadow-md opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 transition-all cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(item.id);
-                    }}
-                    title="Delete photo"
-                    aria-label={`Delete photo #${photoNumber}`}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                {/* Owner/Admin Controls Overlay (Edit Title & Delete) */}
+                {userCanModify && (
+                  <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1.5">
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="size-8 rounded-full shadow-md bg-background/90 backdrop-blur border opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenEditTitle(item);
+                      }}
+                      title="Edit photo title"
+                      aria-label={`Edit photo title #${photoNumber}`}
+                    >
+                      <Pencil className="size-3.5" />
+                    </Button>
+
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      disabled={deletingId === item.id}
+                      className="size-8 rounded-full shadow-md opacity-90 hover:opacity-100 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(item.id);
+                      }}
+                      title="Delete photo"
+                      aria-label={`Delete photo #${photoNumber}`}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </Button>
+                  </div>
                 )}
 
-                {/* H2 Title and Author Handle Outside Card */}
+                {/* H2 Title (Reusing logo tight typography) and Author Handle Outside Card */}
                 <div className="mt-3 flex flex-col gap-1 px-1">
                   <h2
-                    className="text-base sm:text-lg font-serif font-bold text-foreground leading-snug line-clamp-2 cursor-pointer group-hover:text-primary transition-colors"
+                    className="text-base sm:text-lg font-sans font-black tracking-tighter text-foreground leading-snug line-clamp-2 cursor-pointer group-hover:text-primary transition-colors"
                     onClick={() => setActivePhotoIndex(globalIndex)}
                   >
                     #{photoNumber}: {item.caption}
@@ -390,14 +446,14 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
           {activePhoto && activePhotoIndex !== null && (
             <div className="flex flex-col max-h-[94vh] overflow-y-auto">
               <DialogHeader className="p-4 sm:p-5 pb-3 border-b sticky top-0 bg-background/95 backdrop-blur z-10 flex flex-row items-center justify-between gap-4">
-                <DialogTitle className="text-lg sm:text-xl font-serif font-bold flex items-center gap-2 pr-8 min-w-0">
+                <DialogTitle className="text-lg sm:text-xl font-sans font-black tracking-tighter flex items-center gap-2 pr-8 min-w-0">
                   <span className="truncate">#{filteredSubmissions.length - activePhotoIndex}: {activePhoto.caption}</span>
                 </DialogTitle>
                 <Badge variant="outline" className="text-[11px] font-mono px-2.5 py-1 shrink-0 bg-muted/50">
                   {activePhotoIndex + 1} / {filteredSubmissions.length}
                 </Badge>
                 <DialogDescription className="sr-only">
-                  Detailed view of submission #{activePhotoIndex + 1} by {activePhoto.user.username || activePhoto.user.name}
+                  Detailed view of submission #{filteredSubmissions.length - activePhotoIndex} by {activePhoto.user.username || activePhoto.user.name}
                 </DialogDescription>
               </DialogHeader>
 
@@ -458,17 +514,29 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {canDelete(activePhoto) && (
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        disabled={deletingId === activePhoto.id}
-                        onClick={() => handleDelete(activePhoto.id)}
-                        className="gap-1.5 h-8 text-xs font-semibold cursor-pointer"
-                      >
-                        <Trash2 className="size-3.5" />
-                        Delete Photo
-                      </Button>
+                    {canEditOrDelete(activePhoto) && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpenEditTitle(activePhoto)}
+                          className="gap-1.5 h-8 text-xs font-semibold cursor-pointer"
+                        >
+                          <Pencil className="size-3.5" />
+                          Edit Title
+                        </Button>
+
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          disabled={deletingId === activePhoto.id}
+                          onClick={() => handleDelete(activePhoto.id)}
+                          className="gap-1.5 h-8 text-xs font-semibold cursor-pointer"
+                        >
+                          <Trash2 className="size-3.5" />
+                          Delete Photo
+                        </Button>
+                      </>
                     )}
 
                     {activePhoto.moment?.tags && (
@@ -492,6 +560,54 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Title Dialog Modal */}
+      <Dialog open={!!editingPhoto} onOpenChange={(open) => !open && setEditingPhoto(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-sans font-black tracking-tighter">
+              <Pencil className="size-5 text-primary" />
+              Edit Photo Title
+            </DialogTitle>
+            <DialogDescription>
+              Update the caption and title for this photo submission.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveTitle} className="flex flex-col gap-4 py-2">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="edit-title" className="text-sm font-semibold">
+                Photo Title / Caption
+              </Label>
+              <Input
+                id="edit-title"
+                value={editCaption}
+                onChange={(e) => setEditCaption(e.target.value)}
+                placeholder="e.g. Ali Teletubbie"
+                required
+                disabled={isUpdatingTitle}
+                className="h-11 rounded-xl text-sm"
+              />
+            </div>
+
+            <DialogFooter className="mt-4 gap-2">
+              <Button type="button" variant="outline" onClick={() => setEditingPhoto(null)} disabled={isUpdatingTitle}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isUpdatingTitle || !editCaption.trim()} className="font-semibold gap-2">
+                {isUpdatingTitle ? (
+                  <>
+                    <Loader2 data-icon="inline-start" className="animate-spin size-4" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Title"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

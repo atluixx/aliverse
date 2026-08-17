@@ -4,8 +4,8 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { deleteSubmission } from "@/lib/actions/submissions";
 import { Clock, CheckCircle, XCircle, Trash2, Plus, Images } from "lucide-react";
@@ -52,12 +52,12 @@ export function UserSubmissionsList({ submissions: initialSubmissions }: UserSub
           <Images className="size-6" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold">No submissions yet</h3>
+          <h3 className="text-lg font-sans font-black tracking-tighter text-foreground">No submissions yet</h3>
           <p className="text-sm text-muted-foreground max-w-sm mt-1">
             You haven&apos;t submitted any photos to Aliverso yet. Share a memory to contribute to Ali&apos;s shared universe!
           </p>
         </div>
-        <Link href="/submit" className={buttonVariants()}>
+        <Link href="/submit" className={buttonVariants({ size: "sm" })}>
           <Plus data-icon="inline-start" />
           Submit Your First Photo
         </Link>
@@ -68,37 +68,37 @@ export function UserSubmissionsList({ submissions: initialSubmissions }: UserSub
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {submissions.map((item) => (
-        <Card key={item.id} className="overflow-hidden border flex flex-col justify-between shadow-sm">
-          <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+        <Card key={item.id} className="overflow-hidden border flex flex-col justify-between shadow-sm rounded-2xl">
+          <div className="relative aspect-square w-full overflow-hidden bg-muted">
             <Image src={item.imageUrl} alt={item.caption} fill className="object-cover" />
-            <div className="absolute top-3 right-3">
+            <div className="absolute top-3 right-3 z-10">
               {item.status === "PENDING" && (
-                <Badge className="bg-amber-500/90 text-white backdrop-blur border-none flex items-center gap-1">
+                <span className="inline-flex items-center justify-center h-6 px-2.5 text-[11px] font-semibold rounded-full bg-amber-500/90 text-white backdrop-blur shadow-sm gap-1">
                   <Clock className="size-3" /> Pending Review
-                </Badge>
+                </span>
               )}
               {item.status === "APPROVED" && (
-                <Badge className="bg-emerald-600/90 text-white backdrop-blur border-none flex items-center gap-1">
+                <span className="inline-flex items-center justify-center h-6 px-2.5 text-[11px] font-semibold rounded-full bg-emerald-600/90 text-white backdrop-blur shadow-sm gap-1">
                   <CheckCircle className="size-3" /> Approved
-                </Badge>
+                </span>
               )}
               {item.status === "REJECTED" && (
-                <Badge className="bg-rose-600/90 text-white backdrop-blur border-none flex items-center gap-1">
+                <span className="inline-flex items-center justify-center h-6 px-2.5 text-[11px] font-semibold rounded-full bg-rose-600/90 text-white backdrop-blur shadow-sm gap-1">
                   <XCircle className="size-3" /> Rejected
-                </Badge>
+                </span>
               )}
             </div>
           </div>
 
           <CardContent className="p-4 flex-1 flex flex-col justify-between gap-3">
-            <p className="text-sm font-medium line-clamp-2">{item.caption}</p>
+            <p className="text-sm font-sans font-black tracking-tighter text-foreground line-clamp-2">{item.caption}</p>
 
             <div className="flex items-center justify-between pt-2 border-t text-xs text-muted-foreground">
               <span>Submitted {new Date(item.submittedAt).toLocaleDateString()}</span>
               <Button
                 variant="ghost"
                 size="icon"
-                className="size-10 sm:size-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-transform"
+                className="size-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 active:scale-95 transition-transform cursor-pointer"
                 onClick={() => handleDelete(item.id)}
                 disabled={isPending}
                 title="Delete submission"

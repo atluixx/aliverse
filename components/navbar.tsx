@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Upload, Shield, UserCheck, LogOut, LogIn, Users, User as UserIcon, Menu, X } from "lucide-react";
+import { Upload, Shield, UserCheck, LogOut, LogIn, User as UserIcon, Menu, X, Star } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -35,7 +35,7 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-colors">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
-        {/* Brand Logo (Tight typography, zero badge icon) */}
+        {/* Brand Logo (Tight typography matching image titles) */}
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -52,8 +52,24 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Right Section: Theme Toggle + User Actions */}
+        {/* Right Section: GitHub Star + Theme Toggle + User Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* GitHub Star Button */}
+          <a
+            href="https://github.com/atluixx/aliverse"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({
+              variant: "outline",
+              size: "sm",
+              className: "h-9 px-3 gap-1.5 text-xs font-semibold rounded-full border-muted-foreground/20 hover:border-primary/40 transition-colors",
+            })}
+            title="Star repository on GitHub"
+          >
+            <Star className="size-3.5 fill-amber-400 text-amber-500" />
+            <span className="hidden sm:inline">Star on GitHub</span>
+          </a>
+
           <ThemeToggle />
 
           {/* User Auth Section */}
@@ -88,11 +104,8 @@ export function Navbar() {
                 {isAdmin && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem render={<Link href="/admin/review" className="w-full flex items-center gap-2.5 py-2 min-h-[40px]" />}>
-                      <Shield className="size-4 text-amber-500" /> Moderation Dashboard
-                    </DropdownMenuItem>
-                    <DropdownMenuItem render={<Link href="/admin/users" className="w-full flex items-center gap-2.5 py-2 min-h-[40px]" />}>
-                      <Users className="size-4 text-amber-500" /> Manage Admins
+                    <DropdownMenuItem render={<Link href="/admin" className="w-full flex items-center gap-2.5 py-2 min-h-[40px]" />}>
+                      <Shield className="size-4 text-amber-500" /> Admin Dashboard
                     </DropdownMenuItem>
                   </>
                 )}
@@ -172,31 +185,17 @@ export function Navbar() {
                   </p>
                 </div>
                 <Link
-                  href="/admin/review"
+                  href="/admin"
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors min-h-[44px]",
-                    pathname === "/admin/review"
+                    pathname.startsWith("/admin")
                       ? "bg-amber-500/10 text-amber-600 font-semibold"
                       : "text-foreground hover:bg-muted active:bg-muted/80"
                   )}
                 >
                   <Shield className="size-4 text-amber-500" />
-                  <span>Moderation Dashboard</span>
-                </Link>
-
-                <Link
-                  href="/admin/users"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors min-h-[44px]",
-                    pathname === "/admin/users"
-                      ? "bg-amber-500/10 text-amber-600 font-semibold"
-                      : "text-foreground hover:bg-muted active:bg-muted/80"
-                  )}
-                >
-                  <Users className="size-4 text-amber-500" />
-                  <span>Manage Admins</span>
+                  <span>Admin Dashboard</span>
                 </Link>
               </>
             )}
