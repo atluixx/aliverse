@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Sparkles, Calendar, Tag, Upload, Images, User as UserIcon } from "lucide-react";
+import { Sparkles, Calendar, Tag, Upload, Images, User as UserIcon, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface SubmissionItem {
   id: string;
@@ -37,7 +37,7 @@ interface GalleryGridProps {
 
 export function GalleryGrid({ submissions }: GalleryGridProps) {
   const [selectedTag, setSelectedTag] = useState<string>("all");
-  const [activePhoto, setActivePhoto] = useState<SubmissionItem | null>(null);
+  const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
 
   // Extract all unique tags
   const allTags = Array.from(
@@ -51,6 +51,43 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
       ? submissions
       : submissions.filter((sub) => sub.moment?.tags.includes(selectedTag));
 
+  const activePhoto =
+    activePhotoIndex !== null && activePhotoIndex < filteredSubmissions.length
+      ? filteredSubmissions[activePhotoIndex]
+      : null;
+
+  const handlePrev = useCallback(() => {
+    setActivePhotoIndex((prev) => {
+      if (prev === null) return null;
+      return prev > 0 ? prev - 1 : filteredSubmissions.length - 1;
+    });
+  }, [filteredSubmissions.length]);
+
+  const handleNext = useCallback(() => {
+    setActivePhotoIndex((prev) => {
+      if (prev === null) return null;
+      return prev < filteredSubmissions.length - 1 ? prev + 1 : 0;
+    });
+  }, [filteredSubmissions.length]);
+
+  // Keyboard navigation for Lightbox modal
+  useEffect(() => {
+    if (activePhotoIndex === null) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrev();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNext();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activePhotoIndex, handlePrev, handleNext]);
+
   return (
     <div className="flex flex-col gap-8">
       {/* Tag Filters */}
@@ -62,7 +99,10 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
           <Badge
             variant={selectedTag === "all" ? "default" : "outline"}
             className="cursor-pointer transition-colors py-1.5 px-3 shrink-0 text-xs min-h-[36px] flex items-center"
-            onClick={() => setSelectedTag("all")}
+            onClick={() => {
+              setSelectedTag("all");
+              setActivePhotoIndex(null);
+            }}
           >
             All Photos ({submissions.length})
           </Badge>
@@ -71,7 +111,10 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
               key={tag}
               variant={selectedTag === tag ? "default" : "outline"}
               className="cursor-pointer transition-colors capitalize py-1.5 px-3 shrink-0 text-xs min-h-[36px] flex items-center"
-              onClick={() => setSelectedTag(tag)}
+              onClick={() => {
+                setSelectedTag(tag);
+                setActivePhotoIndex(null);
+              }}
             >
               #{tag}
             </Badge>
@@ -98,7 +141,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
         </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSubmissions.map((item) => {
+          {filteredSubmissions.map((item, index) => {
             const author = item.user.username ? `@${item.user.username}` : item.user.name || "Anonymous";
             return (
               <Card
@@ -107,11 +150,11 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                 role="button"
                 aria-label={`View photo titled ${item.caption}`}
                 className="group overflow-hidden cursor-pointer transition-all duration-300 hover:border-primary/50 hover:shadow-md border-border flex flex-col justify-between focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 outline-none"
-                onClick={() => setActivePhoto(item)}
+                onClick={() => setActivePhotoIndex(index)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
-                    setActivePhoto(item);
+                    setActivePhotoIndex(index);
                   }
                 }}
               >
@@ -154,22 +197,25 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
         </div>
       )}
 
-      {/* Detailed Photo Modal View */}
-      <Dialog open={!!activePhoto} onOpenChange={(open) => !open && setActivePhoto(null)}>
+      {/* Detailed Photo Modal View with Carousel Navigation */}
+      <Dialog open={activePhotoIndex !== null} onOpenChange={(open) => !open && setActivePhotoIndex(null)}>
         <DialogContent className="w-[95vw] max-w-3xl p-0 overflow-hidden max-h-[92vh] flex flex-col rounded-2xl border shadow-2xl">
-          {activePhoto && (
+          {activePhoto && activePhotoIndex !== null && (
             <div className="flex flex-col max-h-[92vh] overflow-y-auto">
-              <DialogHeader className="p-4 sm:p-6 pb-3 border-b sticky top-0 bg-background/95 backdrop-blur z-10">
-                <DialogTitle className="text-lg sm:text-xl font-serif font-bold flex items-center gap-2 pr-8">
+              <DialogHeader className="p-4 sm:p-6 pb-3 border-b sticky top-0 bg-background/95 backdrop-blur z-10 flex flex-row items-center justify-between gap-4">
+                <DialogTitle className="text-lg sm:text-xl font-serif font-bold flex items-center gap-2 pr-8 min-w-0">
                   <Sparkles className="size-5 text-primary shrink-0" />
-                  <span className="line-clamp-1">{activePhoto.caption}</span>
+                  <span className="truncate">{activePhoto.caption}</span>
                 </DialogTitle>
+                <Badge variant="outline" className="text-[11px] font-mono px-2.5 py-1 shrink-0 bg-muted/50">
+                  {activePhotoIndex + 1} / {filteredSubmissions.length}
+                </Badge>
                 <DialogDescription className="sr-only">
                   Detailed view of submission by {activePhoto.user.username || activePhoto.user.name}
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-black max-h-[55vh] flex-shrink-0">
+              <div className="relative w-full aspect-[4/3] sm:aspect-[16/10] bg-black max-h-[55vh] flex-shrink-0 flex items-center justify-center">
                 <Image
                   src={activePhoto.imageUrl}
                   alt={activePhoto.caption}
@@ -177,6 +223,37 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                   className="object-contain"
                   priority
                 />
+
+                {/* Floating Carousel Navigation Buttons */}
+                {filteredSubmissions.length > 1 && (
+                  <>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 z-20 size-11 rounded-full bg-background/80 backdrop-blur border shadow-md hover:bg-background active:scale-95 transition-all cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePrev();
+                      }}
+                      aria-label="Previous photo (Left Arrow)"
+                    >
+                      <ChevronLeft className="size-6" />
+                    </Button>
+
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 z-20 size-11 rounded-full bg-background/80 backdrop-blur border shadow-md hover:bg-background active:scale-95 transition-all cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleNext();
+                      }}
+                      aria-label="Next photo (Right Arrow)"
+                    >
+                      <ChevronRight className="size-6" />
+                    </Button>
+                  </>
+                )}
               </div>
 
               <div className="p-4 sm:p-6 flex flex-col gap-4 bg-background">
