@@ -234,7 +234,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10">
           {paginatedSubmissions.map((item, pageItemIndex) => {
             const globalIndex = startIndex + pageItemIndex;
-            const photoNumber = globalIndex + 1;
+            const photoNumber = filteredSubmissions.length - globalIndex;
             const author = item.user.username ? `@${item.user.username}` : item.user.name || "Anonymous";
             const userCanDelete = canDelete(item);
 
@@ -391,7 +391,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
             <div className="flex flex-col max-h-[94vh] overflow-y-auto">
               <DialogHeader className="p-4 sm:p-5 pb-3 border-b sticky top-0 bg-background/95 backdrop-blur z-10 flex flex-row items-center justify-between gap-4">
                 <DialogTitle className="text-lg sm:text-xl font-serif font-bold flex items-center gap-2 pr-8 min-w-0">
-                  <span className="truncate">#{activePhotoIndex + 1}: {activePhoto.caption}</span>
+                  <span className="truncate">#{filteredSubmissions.length - activePhotoIndex}: {activePhoto.caption}</span>
                 </DialogTitle>
                 <Badge variant="outline" className="text-[11px] font-mono px-2.5 py-1 shrink-0 bg-muted/50">
                   {activePhotoIndex + 1} / {filteredSubmissions.length}
