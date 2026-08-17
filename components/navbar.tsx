@@ -29,24 +29,13 @@ export function Navbar() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  const navItems = [
-    { href: "/gallery", label: "Gallery", icon: Images },
-    { href: "/submit", label: "Submit Photo", icon: Upload },
-    { href: "/my-submissions", label: "My Profile", icon: UserCheck },
-  ];
-
-  if (isAdmin) {
-    navItems.push({ href: "/admin/review", label: "Moderation", icon: Shield });
-    navItems.push({ href: "/admin/users", label: "Manage Admins", icon: Users });
-  }
-
   const usernameDisplay = user?.username ? `@${user.username}` : user?.name || "User";
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-all">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         {/* Brand Logo & Mobile Menu Toggle */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
@@ -63,44 +52,45 @@ export function Navbar() {
             </div>
             <span>Aliverso</span>
           </Link>
+
+          {/* Clean Desktop Primary Link */}
+          <nav className="hidden md:flex items-center ml-2">
+            <Link
+              href="/gallery"
+              className={cn(
+                buttonVariants({
+                  variant: pathname === "/gallery" || pathname === "/" ? "secondary" : "ghost",
+                  size: "sm",
+                }),
+                "gap-2 h-10 px-3.5 text-sm font-medium"
+              )}
+            >
+              <Images data-icon="inline-start" className="size-4" />
+              Gallery
+            </Link>
+          </nav>
         </div>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  buttonVariants({
-                    variant: isActive ? "secondary" : "ghost",
-                    size: "sm",
-                  }),
-                  "gap-2 h-10 px-3.5 text-sm font-medium"
-                )}
-              >
-                <Icon data-icon="inline-start" className="size-4" />
-                {item.label}
-                {item.href.startsWith("/admin") && (
-                  <Badge variant="destructive" className="ml-0.5 text-[10px] px-1.5 py-0">
-                    Admin
-                  </Badge>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* User Auth Section */}
+        {/* Right Section: Primary CTA + User Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Prominent Submit Action Button */}
+          <Link
+            href="/submit"
+            className={buttonVariants({
+              size: "sm",
+              className: "h-10 px-4 text-xs font-semibold gap-2 shadow-xs",
+            })}
+          >
+            <Upload data-icon="inline-start" className="size-4" />
+            <span>Submit Photo</span>
+          </Link>
+
+          {/* User Auth Section */}
           {status === "authenticated" && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className="relative flex items-center gap-2 h-10 px-3.5 rounded-full border bg-muted/50 hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring outline-none cursor-pointer transition-colors text-xs font-semibold">
                 <UserIcon className="size-4 text-primary" />
-                <span>{usernameDisplay}</span>
+                <span className="hidden sm:inline">{usernameDisplay}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-60 p-2 shadow-lg rounded-xl">
                 <DropdownMenuLabel className="font-normal px-2 py-1.5">
@@ -119,7 +109,7 @@ export function Navbar() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem render={<Link href="/my-submissions" className="w-full flex items-center gap-2.5 py-2.5 min-h-[44px]" />}>
-                  <UserIcon className="size-4 text-muted-foreground" /> My Profile & Submissions
+                  <UserCheck className="size-4 text-muted-foreground" /> My Profile & Submissions
                 </DropdownMenuItem>
                 <DropdownMenuItem render={<Link href="/submit" className="w-full flex items-center gap-2.5 py-2.5 min-h-[44px]" />}>
                   <Upload className="size-4 text-muted-foreground" /> Submit Photo
@@ -146,14 +136,10 @@ export function Navbar() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <div className="flex items-center gap-2">
-              <Link href="/auth/signin" className={buttonVariants({ variant: "outline", size: "sm", className: "h-10 px-3.5 text-xs sm:text-sm" })}>
+            <div className="flex items-center gap-1.5">
+              <Link href="/auth/signin" className={buttonVariants({ variant: "ghost", size: "sm", className: "h-10 px-3 text-xs sm:text-sm" })}>
                 <LogIn data-icon="inline-start" className="size-4" />
-                <span className="hidden min-[380px]:inline">Sign In</span>
-              </Link>
-              <Link href="/auth/signup" className={buttonVariants({ size: "sm", className: "h-10 px-3.5 text-xs sm:text-sm" })}>
-                <UserPlus data-icon="inline-start" className="size-4" />
-                <span>Sign Up</span>
+                <span>Sign In</span>
               </Link>
             </div>
           )}
@@ -167,33 +153,86 @@ export function Navbar() {
             Navigation Menu
           </p>
           <nav className="flex flex-col gap-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
+            <Link
+              href="/gallery"
+              onClick={() => setMobileMenuOpen(false)}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3.5 py-3 text-base font-medium transition-colors min-h-[44px]",
+                pathname === "/gallery" || pathname === "/"
+                  ? "bg-primary/10 text-primary font-semibold"
+                  : "text-foreground hover:bg-muted active:bg-muted/80"
+              )}
+            >
+              <Images className="size-5 text-primary" />
+              <span>Gallery</span>
+            </Link>
+
+            <Link
+              href="/submit"
+              onClick={() => setMobileMenuOpen(false)}
+              className={cn(
+                "flex items-center gap-3 rounded-lg px-3.5 py-3 text-base font-medium transition-colors min-h-[44px]",
+                pathname === "/submit"
+                  ? "bg-primary/10 text-primary font-semibold"
+                  : "text-foreground hover:bg-muted active:bg-muted/80"
+              )}
+            >
+              <Upload className="size-5 text-primary" />
+              <span>Submit Photo</span>
+            </Link>
+
+            {status === "authenticated" && (
+              <Link
+                href="/my-submissions"
+                onClick={() => setMobileMenuOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3.5 py-3 text-base font-medium transition-colors min-h-[44px]",
+                  pathname === "/my-submissions"
+                    ? "bg-primary/10 text-primary font-semibold"
+                    : "text-foreground hover:bg-muted active:bg-muted/80"
+                )}
+              >
+                <UserCheck className="size-5 text-muted-foreground" />
+                <span>My Profile & Submissions</span>
+              </Link>
+            )}
+
+            {isAdmin && (
+              <>
+                <div className="border-t my-1 pt-1">
+                  <p className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider px-3 py-1">
+                    Admin Tools
+                  </p>
+                </div>
                 <Link
-                  key={item.href}
-                  href={item.href}
+                  href="/admin/review"
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    "flex items-center justify-between rounded-lg px-3.5 py-3 text-base font-medium transition-colors min-h-[44px]",
-                    isActive
-                      ? "bg-primary/10 text-primary font-semibold"
+                    "flex items-center gap-3 rounded-lg px-3.5 py-3 text-base font-medium transition-colors min-h-[44px]",
+                    pathname === "/admin/review"
+                      ? "bg-amber-500/10 text-amber-600 font-semibold"
                       : "text-foreground hover:bg-muted active:bg-muted/80"
                   )}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className={cn("size-5", isActive ? "text-primary" : "text-muted-foreground")} />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.href.startsWith("/admin") && (
-                    <Badge variant="destructive" className="text-[10px]">
-                      Admin
-                    </Badge>
-                  )}
+                  <Shield className="size-5 text-amber-500" />
+                  <span>Moderation Dashboard</span>
                 </Link>
-              );
-            })}
+
+                <Link
+                  href="/admin/users"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3.5 py-3 text-base font-medium transition-colors min-h-[44px]",
+                    pathname === "/admin/users"
+                      ? "bg-amber-500/10 text-amber-600 font-semibold"
+                      : "text-foreground hover:bg-muted active:bg-muted/80"
+                  )}
+                >
+                  <Users className="size-5 text-amber-500" />
+                  <span>Manage Admins & Roles</span>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}

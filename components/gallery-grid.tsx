@@ -166,13 +166,6 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
                     className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03]"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
-                  {item.moment?.tags && item.moment.tags.length > 0 && (
-                    <div className="absolute top-3 left-3 flex flex-wrap gap-1">
-                      <Badge className="bg-background/90 text-foreground backdrop-blur border text-[11px] font-normal shadow-xs">
-                        #{item.moment.tags[0]}
-                      </Badge>
-                    </div>
-                  )}
                 </div>
 
                 <CardContent className="p-4 flex-1 flex flex-col justify-between">

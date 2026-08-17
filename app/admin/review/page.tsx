@@ -77,17 +77,6 @@ export default function AdminReviewPage() {
           Inspect, approve, or reject community photo contributions before they appear in the public gallery.
         </p>
 
-        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1">
-          <span className="flex items-center gap-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full border border-amber-500/20 font-medium">
-            <Clock className="size-3.5" /> Pending Queue Priority
-          </span>
-          <span className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-full border">
-            <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" /> Admin Gatekeeper
-          </span>
-          <span className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-full border">
-            <Layers className="size-3.5" /> Direct Moderation Actions
-          </span>
-        </div>
       </div>
 
       <Suspense fallback={<AdminSkeleton />}>

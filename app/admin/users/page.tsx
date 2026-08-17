@@ -69,17 +69,6 @@ export default function AdminUsersPage() {
           Manage system administrator access, promote trusted community members, or generate co-admin accounts.
         </p>
 
-        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1">
-          <span className="flex items-center gap-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 px-3 py-1 rounded-full border border-amber-500/20 font-medium">
-            <ShieldCheck className="size-3.5" /> Role Governance
-          </span>
-          <span className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-full border">
-            <UserCheck className="size-3.5 text-primary" /> Active Contributors
-          </span>
-          <span className="flex items-center gap-1.5 bg-muted px-3 py-1 rounded-full border">
-            <KeyRound className="size-3.5" /> Secure Credentials
-          </span>
-        </div>
       </div>
 
       <Suspense fallback={<UsersSkeleton />}>

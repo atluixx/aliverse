@@ -78,17 +78,6 @@ export default function GalleryPage() {
             Submitted by community members and verified by admins.
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-muted-foreground pt-1">
-            <span className="flex items-center gap-1.5 bg-muted/60 px-3 py-1.5 rounded-full border">
-              <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" /> Moderated & Safe
-            </span>
-            <span className="flex items-center gap-1.5 bg-muted/60 px-3 py-1.5 rounded-full border">
-              <Sparkles className="size-3.5 text-primary" /> Curated Moments
-            </span>
-            <span className="flex items-center gap-1.5 bg-muted/60 px-3 py-1.5 rounded-full border">
-              <Heart className="size-3.5 text-rose-500" /> Community Memories
-            </span>
-          </div>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
