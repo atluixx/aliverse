@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${inter.variable} ${lora.variable} font-sans h-full antialiased`}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${lora.variable} font-sans h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans selection:bg-primary/10 selection:text-primary pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
         <Providers>
           <Navbar />
