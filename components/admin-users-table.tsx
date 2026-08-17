@@ -25,8 +25,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { updateUserRole, createAdminUser } from "@/lib/actions/users";
-import { Shield, ShieldAlert, UserPlus, Search, MoreVertical, Loader2, User as UserIcon } from "lucide-react";
+import { updateUserRole, createAdminUser, deleteUser } from "@/lib/actions/users";
+import { Shield, ShieldAlert, UserPlus, Search, MoreVertical, Loader2, User as UserIcon, Trash2 } from "lucide-react";
 
 interface AdminUserItem {
   id: string;
@@ -75,6 +75,30 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
         toast.success(`User role updated to ${newRole}.`);
       } catch (err: any) {
         toast.error(err.message || "Failed to update user role.");
+      }
+    });
+  };
+
+  const handleDeleteUser = (userId: string, username: string | null) => {
+    const displayName = username ? `@${username}` : "this user";
+    if (
+      !confirm(
+        `Are you sure you want to permanently delete user ${displayName}? This will delete their account and remove all their submissions.`
+      )
+    )
+      return;
+
+    startTransition(async () => {
+      try {
+        const res = await deleteUser(userId);
+        if (res?.error) {
+          toast.error(res.error);
+          return;
+        }
+        setUsers((prev) => prev.filter((u) => u.id !== userId));
+        toast.success(`User ${displayName} was permanently deleted.`);
+      } catch (err: any) {
+        toast.error(err.message || "Failed to delete user account.");
       }
     });
   };
@@ -213,12 +237,12 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
               </div>
 
               {/* Mobile Actions */}
-              <div className="flex items-center justify-end pt-2">
+              <div className="flex flex-col gap-2 pt-2">
                 <Button
                   variant={item.role === "ADMIN" ? "outline" : "default"}
                   size="sm"
                   className={cn(
-                    "h-10 px-4 text-xs font-semibold gap-2 w-full sm:w-auto",
+                    "h-10 px-4 text-xs font-semibold gap-2 w-full",
                     item.role === "ADMIN" ? "text-rose-600 border-rose-200 hover:bg-rose-50" : "bg-amber-600 hover:bg-amber-700 text-white"
                   )}
                   onClick={() => handleRoleChange(item.id, item.role)}
@@ -234,6 +258,18 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
                     </>
                   )}
                 </Button>
+
+                {item.id !== currentUserId && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="h-10 px-4 text-xs font-semibold gap-2 w-full"
+                    onClick={() => handleDeleteUser(item.id, item.username)}
+                    disabled={isPending}
+                  >
+                    <Trash2 className="size-4" /> Delete User Account
+                  </Button>
+                )}
               </div>
             </div>
           ))}
@@ -289,13 +325,13 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
                       <DropdownMenuTrigger className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-9")}>
                         <MoreVertical className="size-4" />
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-52">
-                        <DropdownMenuLabel>Role Management</DropdownMenuLabel>
+                      <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel>User Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => handleRoleChange(item.id, item.role)}
                           disabled={isPending || item.id === currentUserId}
-                          className="min-h-[44px]"
+                          className="min-h-[40px]"
                         >
                           {item.role === "ADMIN" ? (
                             <>
@@ -309,6 +345,19 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
                             </>
                           )}
                         </DropdownMenuItem>
+                        {item.id !== currentUserId && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteUser(item.id, item.username)}
+                              disabled={isPending}
+                              className="text-destructive focus:text-destructive cursor-pointer min-h-[40px]"
+                            >
+                              <Trash2 data-icon="inline-start" className="size-4" />
+                              Delete User Account
+                            </DropdownMenuItem>
+                          </>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
