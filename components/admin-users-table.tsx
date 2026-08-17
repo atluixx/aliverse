@@ -68,7 +68,11 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
 
     startTransition(async () => {
       try {
-        await updateUserRole(userId, newRole);
+        const res = await updateUserRole(userId, newRole);
+        if (res?.error) {
+          toast.error(res.error);
+          return;
+        }
         setUsers((prev) =>
           prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
         );
@@ -102,6 +106,11 @@ export function AdminUsersTable({ initialUsers, currentUserId }: AdminUsersTable
         email: newEmail || undefined,
         password: newPassword,
       });
+
+      if (res?.error) {
+        toast.error(res.error, { id: "createAdmin" });
+        return;
+      }
 
       toast.success(`Admin @${newUsername} created successfully!`, { id: "createAdmin" });
 

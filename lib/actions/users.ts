@@ -6,33 +6,40 @@ import { Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 
-export async function updateUserRole(targetUserId: string, newRole: Role) {
-  const session = await auth();
+export async function updateUserRole(
+  targetUserId: string,
+  newRole: Role
+): Promise<{ success?: boolean; user?: any; error?: string }> {
+  try {
+    const session = await auth();
 
-  if (!session?.user || session.user.role !== Role.ADMIN) {
-    throw new Error("Forbidden: Only admins can manage user roles.");
-  }
+    if (!session?.user || session.user.role !== Role.ADMIN) {
+      return { error: "Forbidden: Only admins can manage user roles." };
+    }
 
-  // Prevent self-demotion if you're the user being edited
-  if (targetUserId === session.user.id && newRole !== Role.ADMIN) {
-    const adminCount = await db.user.count({
-      where: { role: Role.ADMIN },
+    if (targetUserId === session.user.id && newRole !== Role.ADMIN) {
+      const adminCount = await db.user.count({
+        where: { role: Role.ADMIN },
+      });
+
+      if (adminCount <= 1) {
+        return { error: "Cannot demote the only remaining admin." };
+      }
+    }
+
+    const updatedUser = await db.user.update({
+      where: { id: targetUserId },
+      data: { role: newRole },
     });
 
-    if (adminCount <= 1) {
-      throw new Error("Cannot demote the only remaining admin.");
-    }
+    revalidatePath("/admin/users");
+    revalidatePath("/admin/review");
+
+    return { success: true, user: updatedUser };
+  } catch (err: any) {
+    console.error("Error updating user role:", err);
+    return { error: err.message || "Failed to update user role." };
   }
-
-  const updatedUser = await db.user.update({
-    where: { id: targetUserId },
-    data: { role: newRole },
-  });
-
-  revalidatePath("/admin/users");
-  revalidatePath("/admin/review");
-
-  return { success: true, user: updatedUser };
 }
 
 export async function createAdminUser(data: {
@@ -40,45 +47,49 @@ export async function createAdminUser(data: {
   name?: string;
   email?: string;
   password?: string;
-}) {
-  const session = await auth();
+}): Promise<{ success?: boolean; user?: any; error?: string }> {
+  try {
+    const session = await auth();
 
-  if (!session?.user || session.user.role !== Role.ADMIN) {
-    throw new Error("Forbidden: Only admins can create admin accounts.");
+    if (!session?.user || session.user.role !== Role.ADMIN) {
+      return { error: "Forbidden: Only admins can create admin accounts." };
+    }
+
+    const username = data.username.trim().toLowerCase();
+    const email = data.email?.trim().toLowerCase();
+    const name = data.name?.trim() || username;
+    const password = data.password || "admin123";
+
+    if (!username || username.length < 3) {
+      return { error: "Username must be at least 3 characters long." };
+    }
+
+    const existingUsername = await db.user.findUnique({
+      where: { username },
+    });
+
+    if (existingUsername) {
+      return { error: "Username is already taken." };
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newAdmin = await db.user.create({
+      data: {
+        username,
+        name,
+        email: email || `${username}@aliverso.local`,
+        password: hashedPassword,
+        role: Role.ADMIN,
+        image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      },
+    });
+
+    revalidatePath("/admin/users");
+
+    return { success: true, user: newAdmin };
+  } catch (err: any) {
+    console.error("Error creating admin user:", err);
+    return { error: err.message || "Failed to create admin account." };
   }
-
-  const username = data.username.trim().toLowerCase();
-  const email = data.email?.trim().toLowerCase();
-  const name = data.name?.trim() || username;
-  const password = data.password || "admin123";
-
-  if (!username || username.length < 3) {
-    throw new Error("Username must be at least 3 characters long.");
-  }
-
-  // Check username collision
-  const existingUsername = await db.user.findUnique({
-    where: { username },
-  });
-
-  if (existingUsername) {
-    throw new Error("Username is already taken.");
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const newAdmin = await db.user.create({
-    data: {
-      username,
-      name,
-      email: email || `${username}@aliverso.local`,
-      password: hashedPassword,
-      role: Role.ADMIN,
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
-    },
-  });
-
-  revalidatePath("/admin/users");
-
-  return { success: true, user: newAdmin };
 }

@@ -58,7 +58,11 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
   const handleApprove = (id: string) => {
     startTransition(async () => {
       try {
-        await approveSubmission(id);
+        const res = await approveSubmission(id);
+        if (res?.error) {
+          toast.error(res.error);
+          return;
+        }
         setSubmissions((prev) =>
           prev.map((item) =>
             item.id === id ? { ...item, status: "APPROVED", reviewedAt: new Date() } : item
@@ -74,7 +78,11 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
   const handleReject = (id: string) => {
     startTransition(async () => {
       try {
-        await rejectSubmission(id);
+        const res = await rejectSubmission(id);
+        if (res?.error) {
+          toast.error(res.error);
+          return;
+        }
         setSubmissions((prev) =>
           prev.map((item) =>
             item.id === id ? { ...item, status: "REJECTED", reviewedAt: new Date() } : item
@@ -92,7 +100,11 @@ export function AdminReviewTable({ initialSubmissions }: AdminReviewTableProps) 
 
     startTransition(async () => {
       try {
-        await deleteSubmission(id);
+        const res = await deleteSubmission(id);
+        if (res?.error) {
+          toast.error(res.error);
+          return;
+        }
         setSubmissions((prev) => prev.filter((item) => item.id !== id));
         toast.success("Submission deleted.");
       } catch (err: any) {

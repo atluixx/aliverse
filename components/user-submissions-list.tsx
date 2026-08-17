@@ -32,7 +32,11 @@ export function UserSubmissionsList({ submissions: initialSubmissions }: UserSub
 
     startTransition(async () => {
       try {
-        await deleteSubmission(id);
+        const res = await deleteSubmission(id);
+        if (res?.error) {
+          toast.error(res.error);
+          return;
+        }
         setSubmissions((prev) => prev.filter((item) => item.id !== id));
         toast.success("Photo submission deleted.");
       } catch (err: any) {
