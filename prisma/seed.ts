@@ -1,16 +1,19 @@
-import { PrismaClient, Role, SubmissionStatus } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Seeding database with username & password support...");
+  console.log("Seeding database (clean gallery mode)...");
+
+  // Clear any old mock submissions
+  await prisma.submission.deleteMany({});
 
   const adminPasswordHash = await bcrypt.hash("ali123", 10);
   const userPasswordHash = await bcrypt.hash("user123", 10);
 
   // Seed Admin user (Ali)
-  const ali = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: "ali@aliverso.com" },
     update: {
       username: "ali",
@@ -22,13 +25,12 @@ async function main() {
       name: "Ali",
       email: "ali@aliverso.com",
       password: adminPasswordHash,
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
       role: Role.ADMIN,
     },
   });
 
   // Seed standard user
-  const demoUser = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: "user@aliverso.com" },
     update: {
       username: "contributor",
@@ -40,43 +42,25 @@ async function main() {
       name: "Universe Contributor",
       email: "user@aliverso.com",
       password: userPasswordHash,
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
       role: Role.USER,
     },
   });
 
-  // Check if moments exist
-  let momentParis = await prisma.moment.findFirst({ where: { caption: { contains: "Paris" } } });
-  if (!momentParis) {
-    momentParis = await prisma.moment.create({
-      data: {
-        caption: "Ali in Paris - Sunset near Eiffel Tower",
-        tags: ["travel", "paris", "eiffel"],
-      },
-    });
+  // Seed standard moments categories
+  const moments = [
+    { caption: "Ali in Paris - Sunset near Eiffel Tower", tags: ["travel", "paris", "eiffel"] },
+    { caption: "Ali Keynote at AI Summit 2026", tags: ["tech", "ai", "keynote"] },
+    { caption: "Aliverso Annual Celebration", tags: ["party", "friends", "aliverso"] },
+  ];
+
+  for (const m of moments) {
+    const existing = await prisma.moment.findFirst({ where: { caption: m.caption } });
+    if (!existing) {
+      await prisma.moment.create({ data: m });
+    }
   }
 
-  let momentTech = await prisma.moment.findFirst({ where: { caption: { contains: "Tech" } } });
-  if (!momentTech) {
-    momentTech = await prisma.moment.create({
-      data: {
-        caption: "Ali Keynote at AI Summit 2026",
-        tags: ["tech", "ai", "keynote"],
-      },
-    });
-  }
-
-  let momentParty = await prisma.moment.findFirst({ where: { caption: { contains: "Celebration" } } });
-  if (!momentParty) {
-    momentParty = await prisma.moment.create({
-      data: {
-        caption: "Aliverso Annual Celebration",
-        tags: ["party", "friends", "aliverso"],
-      },
-    });
-  }
-
-  console.log("Seeding completed successfully.");
+  console.log("Database clean seed completed successfully.");
 }
 
 main()

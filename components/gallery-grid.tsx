@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { buttonVariants } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +15,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Sparkles, Calendar, Tag, User } from "lucide-react";
+import { Sparkles, Calendar, Tag, Upload, Images } from "lucide-react";
 
 interface SubmissionItem {
   id: string;
@@ -55,7 +58,7 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
     <div className="flex flex-col gap-8">
       {/* Tag Filters */}
       {allTags.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 pb-2 border-b">
+        <div className="flex flex-wrap items-center gap-2 pb-2">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1 mr-2">
             <Tag className="size-3.5" /> Filter by:
           </span>
@@ -76,20 +79,27 @@ export function GalleryGrid({ submissions }: GalleryGridProps) {
               #{tag}
             </Badge>
           ))}
+          <Separator className="mt-2" />
         </div>
       )}
 
       {/* Gallery Grid */}
       {filteredSubmissions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 text-center border border-dashed rounded-xl bg-muted/40 gap-3">
+        <Card className="flex flex-col items-center justify-center p-12 text-center border-dashed gap-4">
           <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-            <Sparkles className="size-6" />
+            <Images className="size-6" />
           </div>
-          <h3 className="text-lg font-semibold">No approved moments yet</h3>
-          <p className="text-sm text-muted-foreground max-w-sm">
-            Be the first to share a moment in the Aliverso! Submit a photo to appear in the gallery once reviewed.
-          </p>
-        </div>
+          <div className="flex flex-col gap-1 max-w-sm">
+            <h3 className="text-lg font-bold">No approved photos yet</h3>
+            <p className="text-sm text-muted-foreground">
+              The public gallery is clean and ready for real photos. Be the first contributor to submit a photo!
+            </p>
+          </div>
+          <Link href="/submit" className={buttonVariants({ size: "sm" })}>
+            <Upload data-icon="inline-start" />
+            Submit a Photo
+          </Link>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredSubmissions.map((item) => (

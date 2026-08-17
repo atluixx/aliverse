@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { Sparkles, Upload, Shield, Images, UserCheck, LogOut, LogIn, UserPlus, Users } from "lucide-react";
+import { Sparkles, Upload, Shield, Images, UserCheck, LogOut, LogIn, UserPlus, Users, User } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -26,7 +26,7 @@ export function Navbar() {
   const navItems = [
     { href: "/gallery", label: "Gallery", icon: Images },
     { href: "/submit", label: "Submit Photo", icon: Upload },
-    { href: "/my-submissions", label: "My Submissions", icon: UserCheck },
+    { href: "/my-submissions", label: "My Profile", icon: UserCheck },
   ];
 
   if (isAdmin) {
@@ -82,7 +82,7 @@ export function Navbar() {
                 <Button variant="ghost" className="relative size-10 rounded-full p-0">
                   <Avatar className="size-10 border border-border">
                     <AvatarImage src={user.image || undefined} alt={user.name || "User"} />
-                    <AvatarFallback>{user.name?.substring(0, 2).toUpperCase() || "AL"}</AvatarFallback>
+                    <AvatarFallback>{user.name?.substring(0, 2).toUpperCase() || user.username?.substring(0, 2).toUpperCase() || "AL"}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -106,20 +106,26 @@ export function Navbar() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <Link href="/my-submissions" className="w-full">
-                    My Submissions
+                  <Link href="/my-submissions" className="w-full flex items-center gap-2">
+                    <User className="size-4" /> My Profile & Submissions
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/submit" className="w-full flex items-center gap-2">
+                    <Upload className="size-4" /> Submit Photo
                   </Link>
                 </DropdownMenuItem>
                 {isAdmin && (
                   <>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Link href="/admin/review" className="w-full">
-                        Admin Moderation Dashboard
+                      <Link href="/admin/review" className="w-full flex items-center gap-2">
+                        <Shield className="size-4" /> Moderation Dashboard
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link href="/admin/users" className="w-full">
-                        Manage Admins & Roles
+                      <Link href="/admin/users" className="w-full flex items-center gap-2">
+                        <Users className="size-4" /> Manage Admins & Roles
                       </Link>
                     </DropdownMenuItem>
                   </>
