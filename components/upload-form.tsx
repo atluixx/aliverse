@@ -23,6 +23,54 @@ interface UploadFormProps {
   moments: MomentOption[];
 }
 
+async function compressImage(file: File, maxDim = 1920, quality = 0.82): Promise<File> {
+  if (file.size < 350 * 1024) return file;
+
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = document.createElement("img");
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(file);
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return resolve(file);
+            const compressed = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+            resolve(compressed);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+    };
+    reader.onerror = () => resolve(file);
+  });
+}
+
 export function UploadForm({ moments }: UploadFormProps) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
@@ -59,12 +107,15 @@ export function UploadForm({ moments }: UploadFormProps) {
     }
 
     setIsSubmitting(true);
-    toast.loading("Uploading photo to Aliverso...", { id: "uploading" });
+    toast.loading("Optimizing and uploading photo...", { id: "uploading" });
 
     try {
-      // Upload file directly via FormData endpoint (handles Vercel Blob or Base64 Data URL)
+      // Compress image client-side to ensure fast upload and small payload
+      const optimizedFile = await compressImage(file);
+
+      // Upload file via FormData endpoint
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", optimizedFile);
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
